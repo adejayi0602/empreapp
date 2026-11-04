@@ -1,0 +1,8 @@
+# Never commit the live database or secrets
+data/*.sqlite
+data/*.sqlite-*
+data/*.db
+.env
+*.log
+.DS_Store
+__pycache__/

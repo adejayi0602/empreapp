@@ -77,7 +77,7 @@
         })
         .catch(function(){
           note.className='form-note fail';
-          note.innerHTML='We could not send your message right now. Please email us directly at <a href="mailto:info@empretechnologies.com.ng">info@empretechnologies.com.ng</a> or call +234 810 370 2504.';
+          note.innerHTML='We could not send your message right now. Please email us directly at <a href="mailto:info@empretechnologies.com.ng">info@empretechnologies.com.ng</a> or call +234 813 964 5973.';
         })
         .then(function(){submit.disabled=false; submit.innerHTML=label});
     });
@@ -106,7 +106,7 @@
         })
         .catch(function(){
           enote.className='form-note fail';
-          enote.innerHTML='We could not complete your enrolment right now. Please email <a href="mailto:info@empretechnologies.com.ng">info@empretechnologies.com.ng</a> or call +234 810 370 2504.';
+          enote.innerHTML='We could not complete your enrolment right now. Please email <a href="mailto:info@empretechnologies.com.ng">info@empretechnologies.com.ng</a> or call +234 813 964 5973.';
         })
         .then(function(){esub.disabled=false; esub.innerHTML=label});
     });

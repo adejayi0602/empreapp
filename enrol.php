@@ -98,6 +98,6 @@ send(ADMIN_EMAIL, "New enrolment $studentId — $course — $name",
 send($email, "Your Empre Technologies enrolment — $studentId",
     "Hello $name,\n\nThank you for enrolling for $course with Empre Technologies.\n\n"
   . "Your Student ID: $studentId\n\nOur team will review your enrolment and send your invoice and next steps to this email address.\n"
-  . "Please quote your Student ID in any communication with us.\n\nEmpre Technologies Ltd\n" . ADMIN_EMAIL . "\n+234 810 370 2504\n", ADMIN_EMAIL);
+  . "Please quote your Student ID in any communication with us.\n\nEmpre Technologies Ltd\n" . ADMIN_EMAIL . "\n+234 813 964 5973\n", ADMIN_EMAIL);
 
 out(['ok' => true, 'student_id' => $studentId, 'name' => $name, 'course' => $course]);

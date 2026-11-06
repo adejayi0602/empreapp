@@ -14,7 +14,7 @@
     <div><h4>Contact Us</h4>
       <ul class="contact-list">
         <li><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-mail"/></svg><a href="mailto:info@empretechnologies.com.ng">info@empretechnologies.com.ng</a></li>
-        <li><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-phone"/></svg><a href="tel:+2348103702504">+234 810 370 2504</a></li>
+        <li><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-phone"/></svg><a href="tel:+2348139645973">+234 813 964 5973</a></li>
         <li><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-globe"/></svg><a href="https://www.empretechnologies.com" target="_blank" rel="noopener">www.empretechnologies.com</a></li>
         <li><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-instagram"/></svg><span>Instagram: Empre Technologies</span></li>
       </ul>

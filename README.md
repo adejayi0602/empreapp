@@ -11,6 +11,28 @@ Requirements: PHP 8.0+ with pdo_sqlite and mbstring (standard on cPanel), and ma
 5. Edit `config.php`: set NOTIFY_EMAIL / FROM_EMAIL (use an address on your own domain).
 6. Send a test contact message and a test enrolment, and confirm the emails arrive.
 
+## Staff, access levels and tasks
+Create staff in **Admin > Staff & access** (Super Admin only). Each person has a **job title** (CEO, CTO, CIO, Manager, Team Lead,
+Operation Lead, Operation, Sales, Facilitator: labels only) and an **access level** (what they can do):
+
+| Access level | Can do | Cannot do |
+|---|---|---|
+| **Super Admin** | Everything, including all deletes, staff, settings, assigning tasks | — |
+| **Level 1 · Administrator** | Manage students, payments, contacts, courses (create/edit) | Delete anything; settings; staff; assign tasks |
+| **Level 2 · Billing Officer** | View students (read-only); create invoices, record/confirm payments, view receipts | Edit students/contacts/courses; delete anything |
+| **Level 3 · Intake Officer** | Add new students | Billing, viewing students, and all other admin |
+
+To change what a level can do, edit `ROLE_PERMS` at the top of `lib/admin_ui.php`.
+Every staff member can always see and update **their own tasks**, whatever their level.
+
+**Tasks:** every new enrolment automatically creates a task "Review application and prepare invoice" (**Not Assigned**).
+The Super Admin assigns it to a staff member (**In Progress**); unassigning returns it to **Not Assigned**. The assignee posts
+updates as comments and marks it **Completed** when done. The Super Admin can also add more tasks to any student, set due dates,
+re-open or reassign. Assignees get an email when a task is assigned (needs working `mail()`).
+
+**Upgrading an existing install:** upload the new files over the old ones. The database upgrades itself on first load, and the
+admin account(s) you already have become **Super Admin**. Then add your staff.
+
 ## Security (important)
 * `data/` holds the database. It is blocked by `data/.htaccess` on Apache/LiteSpeed. On Nginx — or to be safest anywhere —
   move the file outside `public_html` and change `DB_PATH` in `config.php` (e.g. `/home/youruser/empre-data/empre.sqlite`).

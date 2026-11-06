@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../lib/admin_ui.php'; require_admin(); require __DIR__ . '/_doc.php';
+require __DIR__ . '/../lib/admin_ui.php'; require_admin(); require_perm('docs.view'); require __DIR__ . '/_doc.php';
 $p = q1("SELECT * FROM payments WHERE id=? AND status='Confirmed' AND receipt_no IS NOT NULL", [(int)($_GET['id'] ?? 0)]);
 if (!$p) { http_response_code(404); exit('Receipt not found (only confirmed payments have receipts).'); }
 $st = q1("SELECT * FROM students WHERE id=?", [$p['student_id']]);

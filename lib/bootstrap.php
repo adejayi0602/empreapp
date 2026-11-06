@@ -81,10 +81,23 @@ function migrate(PDO $pdo): void {
         id INTEGER PRIMARY KEY, name TEXT, email TEXT, phone TEXT, service TEXT, message TEXT,
         status TEXT DEFAULT 'New', next_action TEXT, notes TEXT, follow_up TEXT, created_at TEXT, updated_at TEXT);
     CREATE TABLE IF NOT EXISTS activity(id INTEGER PRIMARY KEY, entity TEXT, entity_id INTEGER, text TEXT, admin TEXT, created_at TEXT);
+    CREATE TABLE IF NOT EXISTS tasks(
+        id INTEGER PRIMARY KEY, student_id INTEGER REFERENCES students(id) ON DELETE CASCADE, title TEXT NOT NULL, details TEXT,
+        assigned_to INTEGER REFERENCES admins(id) ON DELETE SET NULL, status TEXT DEFAULT 'Not Assigned', due_date TEXT,
+        created_by TEXT, created_at TEXT, assigned_at TEXT, updated_at TEXT, completed_at TEXT, completed_by TEXT);
+    CREATE TABLE IF NOT EXISTS task_comments(
+        id INTEGER PRIMARY KEY, task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE, admin_id INTEGER, author TEXT, body TEXT NOT NULL, created_at TEXT);
+    CREATE INDEX IF NOT EXISTS ix_task_assignee ON tasks(assigned_to, status);
+    CREATE INDEX IF NOT EXISTS ix_task_student ON tasks(student_id);
+    CREATE INDEX IF NOT EXISTS ix_task_comments ON task_comments(task_id);
     CREATE INDEX IF NOT EXISTS ix_act ON activity(entity, entity_id);
     CREATE INDEX IF NOT EXISTS ix_stu_course ON students(course_id);
     CREATE INDEX IF NOT EXISTS ix_pay_inv ON payments(invoice_id);
     ");
+    // Upgrade older installs: staff roles. Existing admins become Super Admins.
+    $cols = array_column($pdo->query("PRAGMA table_info(admins)")->fetchAll(), 'name');
+    foreach (['title' => "TEXT DEFAULT ''", 'role' => "TEXT DEFAULT 'super_admin'", 'active' => 'INTEGER DEFAULT 1', 'last_login' => 'TEXT'] as $c => $def)
+        if (!in_array($c, $cols, true)) $pdo->exec("ALTER TABLE admins ADD COLUMN $c $def");
     if (!$pdo->query("SELECT 1 FROM settings WHERE k='seeded'")->fetch()) {
         seed_courses($pdo);
         $pdo->exec("INSERT OR IGNORE INTO settings(k,v) VALUES('seeded','1')");
@@ -164,6 +177,8 @@ function lines(?string $t): array { return array_values(array_filter(array_map('
 
 /* ---------------------------------------------------------------- students */
 const SEXES = ['Male', 'Female', 'Prefer not to say'];
+const TITLES = ['CEO', 'CTO', 'CIO', 'Manager', 'Team Lead', 'Operation Lead', 'Operation', 'Sales', 'Facilitator'];
+const TASK_STATUSES = ['Not Assigned', 'In Progress', 'Completed'];
 const STUDENT_STATUSES = ['Applied', 'Under review', 'Approved', 'Enrolled', 'Completed', 'Withdrawn'];
 const PLANS = ['Not set', 'Full payment', 'Installments'];
 
@@ -178,6 +193,8 @@ function create_student(array $d): array {
              $d['status'] ?? 'Applied', 'Not set', $course['fee'], now(), now()]);
     });
     log_act('student', $id, 'Application received for ' . $course['title'] . ' (' . $code . ')');
+    // Every new student gets a starter task so nothing is missed. The Super Admin assigns it to a staff member.
+    create_task($id, 'Review application and prepare invoice', 'New enrolment for ' . $course['title'] . '. Verify the applicant details, confirm the fee, and prepare the invoice.', null, '', 'System');
     return ['id' => $id, 'code' => $code, 'course' => $course];
 }
 
@@ -199,4 +216,30 @@ function invoice_state(array $i): array {
     elseif ($i['due_date'] && $i['due_date'] < date('Y-m-d')) $label = 'Overdue';
     else $label = 'Unpaid';
     return ['paid' => $paid, 'balance' => $bal, 'label' => $label];
+}
+
+
+/* ------------------------------------------------------------------ tasks
+ * Status rules:  assigned to someone -> "In Progress" · unassigned -> "Not Assigned" · finished -> "Completed"
+ */
+function create_task(int $studentId, string $title, string $details = '', ?int $assignee = null, string $due = '', string $by = 'System'): int {
+    $id = run("INSERT INTO tasks(student_id,title,details,assigned_to,status,due_date,created_by,created_at,assigned_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?)",
+        [$studentId, $title, $details, $assignee, $assignee ? 'In Progress' : 'Not Assigned', $due, $by, now(), $assignee ? now() : null, now()]);
+    log_act('task', $id, 'Task created' . ($assignee ? ' and assigned to ' . admin_label($assignee) : ' (not assigned)'));
+    return $id;
+}
+function task_assign(int $taskId, ?int $adminId): void {
+    $before = q1("SELECT * FROM tasks WHERE id=?", [$taskId]);
+    if (!$before) return;
+    if ($adminId) {
+        run("UPDATE tasks SET assigned_to=?, status='In Progress', assigned_at=?, completed_at=NULL, completed_by=NULL, updated_at=? WHERE id=?", [$adminId, now(), now(), $taskId]);
+        log_act('task', $taskId, 'Assigned to ' . admin_label($adminId) . ' — status: In Progress');
+    } else {
+        run("UPDATE tasks SET assigned_to=NULL, status='Not Assigned', assigned_at=NULL, completed_at=NULL, completed_by=NULL, updated_at=? WHERE id=?", [now(), $taskId]);
+        log_act('task', $taskId, 'Unassigned — status: Not Assigned');
+    }
+}
+function admin_label(?int $id): string {
+    $a = $id ? q1("SELECT name,title FROM admins WHERE id=?", [$id]) : null;
+    return $a ? $a['name'] . ($a['title'] ? ' (' . $a['title'] . ')' : '') : 'Unknown';
 }

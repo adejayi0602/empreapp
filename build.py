@@ -6,12 +6,13 @@ import os, math, random
 ROOT = os.path.dirname(os.path.abspath(__file__))
 EMAIL = "info@empretechnologies.com.ng"
 PHONE_DISPLAY = "+234 813 964 5973"
-PHONE_TEL = "+23481396459734"
+PHONE_TEL = "+2348139645973"
 WEBSITE = "www.empretechnologies.com"
-INSTAGRAM_HANDLE = "Empre Technologies"
+INSTAGRAM_URL = "https://www.instagram.com/empre_technologies"
+LINKEDIN_URL = "https://www.linkedin.com/company/empre-technologies"
+INSTAGRAM_HANDLE = "@empre_technologies"
 # TODO: replace "#" with the real profile URLs
-SOCIAL = [("instagram", "Instagram", "https://www.instagram.com/empre_technologies"), ("linkedin", "LinkedIn", "https://www.linkedin.com/company/empre-technologies"),
-          ("x", "X (Twitter)", "#")]
+SOCIAL = [("instagram", "Instagram", INSTAGRAM_URL), ("linkedin", "LinkedIn", LINKEDIN_URL)]
 
 # ------------------------------------------------------------------ icons
 ICONS = {
@@ -29,8 +30,6 @@ ICONS = {
  "globe": '<circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>',
  "instagram": '<rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><path d="M17.5 6.5h.01"/>',
  "linkedin": '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-4 0v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/>',
- "x": '<path d="M4 4l16 16M20 4 4 20"/>',
- "facebook": '<path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/>',
  "check": '<path d="M20 6 9 17l-5-5"/>',
  "arrow": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
  "menu": '<path d="M4 7h16M4 12h16M4 17h16"/>',
@@ -166,6 +165,9 @@ def footer():
       <ul class="contact-list">
         <li>{ic("mail")}<a href="mailto:{EMAIL}">{EMAIL}</a></li>
         <li>{ic("phone")}<a href="tel:{PHONE_TEL}">{PHONE_DISPLAY}</a></li>
+        <li>{ic("globe")}<a href="https://{WEBSITE}" target="_blank" rel="noopener">{WEBSITE}</a></li>
+        <li>{ic("instagram")}<a href="{INSTAGRAM_URL}" target="_blank" rel="noopener">Instagram: {INSTAGRAM_HANDLE}</a></li>
+        <li>{ic("linkedin")}<a href="{LINKEDIN_URL}" target="_blank" rel="noopener">LinkedIn: Empre Technologies</a></li>
       </ul>
     </div>
   </div>
@@ -334,7 +336,7 @@ def page_services():
 def page_contact():
     opts = '<option value="">Select a service (optional)</option>' + "".join(f'<option value="{s["title"]}" data-id="{s["id"]}">{s["title"]}</option>' for s in SERVICES) + '<option value="Other">Other / Not sure</option>'
     info = [("mail", "Email", EMAIL, f"mailto:{EMAIL}"), ("phone", "Phone", PHONE_DISPLAY, f"tel:{PHONE_TEL}"),
-            ("globe", "Website", WEBSITE, f"https://{WEBSITE}"), ("instagram", "Instagram", INSTAGRAM_HANDLE, "#")]
+            ("globe", "Website", WEBSITE, f"https://{WEBSITE}"), ("instagram", "Instagram", INSTAGRAM_HANDLE, INSTAGRAM_URL)]
     il = "".join(f'<a class="info" href="{h}"><span class="ico">{ic(i)}</span><div><small>{l}</small><b>{v}</b></div></a>' for i, l, v, h in info)
     body = head("Contact Us | Empre Technologies Ltd", "Get in touch with Empre Technologies for IT support, Microsoft 365, security, training, web development and branding.", "contact") + header("contact.html")
     body += banner("Contact Us", "Contact", "Have a question or a project in mind? We'd love to hear from you.")

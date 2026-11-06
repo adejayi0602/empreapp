@@ -10,8 +10,8 @@ PHONE_TEL = "+2348139645973"
 WEBSITE = "www.empretechnologies.com"
 INSTAGRAM_HANDLE = "Empre Technologies"
 # TODO: replace "#" with the real profile URLs
-SOCIAL = [("instagram", "Instagram", "https://www.instagram.com/empre_technologies"), ("linkedin", "LinkedIn", "https://www.linkedin.com/company/empre-technologies"),
-          ("x", "X (Twitter)", "https://twitter.com/empre_tech")]
+SOCIAL = [("instagram", "Instagram", "#"), ("linkedin", "LinkedIn", "#"),
+          ("x", "X (Twitter)", "#"), ("facebook", "Facebook", "#")]
 
 # ------------------------------------------------------------------ icons
 ICONS = {
@@ -166,6 +166,8 @@ def footer():
       <ul class="contact-list">
         <li>{ic("mail")}<a href="mailto:{EMAIL}">{EMAIL}</a></li>
         <li>{ic("phone")}<a href="tel:{PHONE_TEL}">{PHONE_DISPLAY}</a></li>
+        <li>{ic("globe")}<a href="https://{WEBSITE}" target="_blank" rel="noopener">{WEBSITE}</a></li>
+        <li>{ic("instagram")}<span>Instagram: {INSTAGRAM_HANDLE}</span></li>
       </ul>
     </div>
   </div>

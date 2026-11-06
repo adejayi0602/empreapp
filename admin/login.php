@@ -1,7 +1,8 @@
 <?php
 require __DIR__ . '/../lib/bootstrap.php';
 if (!qv("SELECT COUNT(*) FROM admins")) redirect('setup.php');
-if (isset($_SESSION['admin'])) redirect('index.php');
+require_once __DIR__ . '/../lib/admin_ui.php';
+if (admin_user()) redirect(home_page());
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
@@ -10,12 +11,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     else {
         $u = q1("SELECT * FROM admins WHERE email=?", [strtolower(line(post('email', 150)))]);
         if ($u && password_verify((string)($_POST['password'] ?? ''), $u['password_hash'])) {
-            session_regenerate_id(true);
-            $_SESSION['admin'] = ['id' => $u['id'], 'name' => $u['name'], 'email' => $u['email']];
-            unset($_SESSION['fails']); redirect('index.php');
+            if ((int)$u['active'] !== 1) { $err = 'This account has been suspended. Please contact the Super Admin.'; }
+            else {
+                session_regenerate_id(true);
+                $_SESSION['admin'] = ['id' => $u['id'], 'name' => $u['name'], 'email' => $u['email']];
+                run("UPDATE admins SET last_login=? WHERE id=?", [now(), $u['id']]);
+                unset($_SESSION['fails']); redirect('index.php');   // index.php forwards each role to its own landing page
+            }
         }
         $_SESSION['fails'] = ($fails >= 5 ? 0 : $fails) + 1; $_SESSION['fail_t'] = time();
-        usleep(600000); $err = 'Incorrect email or password.';
+        usleep(600000); if (!$err) $err = 'Incorrect email or password.';
     }
 }
 ?><!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Sign in | Empre Admin</title>

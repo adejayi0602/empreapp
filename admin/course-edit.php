@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../lib/admin_ui.php'; require_admin();
+require __DIR__ . '/../lib/admin_ui.php'; require_admin(); require_perm('courses.edit');
 $id = (int)($_GET['id'] ?? 0);
 $c = $id ? q1("SELECT * FROM courses WHERE id=?", [$id]) : null;
 if ($id && !$c) { flash('Course not found.', 'err'); redirect('courses.php'); }
@@ -8,7 +8,7 @@ $f = $c ?: ['title' => '', 'icon' => 'code', 'summary' => '', 'description' => '
 $err = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
-    if (post('action') === 'delete' && $c) {
+    if (post('action') === 'delete' && $c) { require_perm('courses.delete');
         if ((int)qv("SELECT COUNT(*) FROM students WHERE course_id=?", [$id])) { flash('This course has students, so it cannot be deleted. Hide it instead.', 'err'); redirect("course-edit.php?id=$id"); }
         run("DELETE FROM courses WHERE id=?", [$id]); flash('Course deleted.'); redirect('courses.php');
     }
@@ -52,5 +52,5 @@ admin_head($c ? 'Edit course' : 'Add course', 'courses'); ?>
   <p class="muted small">Changing the fee does not alter existing students' fees; adjust those on each student's page.</p>
   <button class="btn"><?= $c ? 'Save course' : 'Add course' ?></button> <a class="btn ghost" href="courses.php">Cancel</a>
 </form>
-<?php if ($c): ?><form method="post" data-confirm="Delete this course permanently?"><?= csrf_field() ?><input type="hidden" name="action" value="delete"><button class="btn danger sm">Delete course</button></form><?php endif; ?>
+<?php if ($c && can('courses.delete')): ?><form method="post" data-confirm="Delete this course permanently?"><?= csrf_field() ?><input type="hidden" name="action" value="delete"><button class="btn danger sm">Delete course</button></form><?php endif; ?>
 <?php admin_foot();

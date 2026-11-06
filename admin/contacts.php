@@ -1,7 +1,7 @@
 <?php
-require __DIR__ . '/../lib/admin_ui.php'; require_admin();
+require __DIR__ . '/../lib/admin_ui.php'; require_admin(); require_perm('contacts.view');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    csrf_check();
+    csrf_check(); require_perm('contacts.edit');
     $id = (int)post('id');
     if (post('action') === 'quick_status' && in_array(post('status'), CONTACT_STATUSES, true) && ($c = q1("SELECT * FROM contacts WHERE id=?", [$id]))) {
         run("UPDATE contacts SET status=?, updated_at=? WHERE id=?", [post('status'), now(), $id]);
@@ -26,8 +26,8 @@ admin_head('Contacts', 'contacts'); ?>
 <td class="muted small"><?= e(dt($r['created_at'])) ?></td>
 <td><a href="contact.php?id=<?= $r['id'] ?>"><b><?= e($r['name']) ?></b></a><br><span class="muted small"><?= e($r['email']) ?><?= $r['phone'] ? ' · ' . e($r['phone']) : '' ?></span></td>
 <td><?= e($r['service'] ?: 'General') ?></td>
-<td><form method="post" style="margin:0"><?= csrf_field() ?><input type="hidden" name="action" value="quick_status"><input type="hidden" name="id" value="<?= $r['id'] ?>"><input type="hidden" name="f_status" value="<?= e($fs) ?>"><input type="hidden" name="f_q" value="<?= e($fq) ?>">
-<select name="status" onchange="this.form.submit()" style="width:auto;padding:6px 10px"><?= opts(CONTACT_STATUSES, $r['status']) ?></select></form></td>
+<td><?php if (!can('contacts.edit')): ?><?= badge($r['status']) ?><?php else: ?><form method="post" style="margin:0"><?= csrf_field() ?><input type="hidden" name="action" value="quick_status"><input type="hidden" name="id" value="<?= $r['id'] ?>"><input type="hidden" name="f_status" value="<?= e($fs) ?>"><input type="hidden" name="f_q" value="<?= e($fq) ?>">
+<select name="status" onchange="this.form.submit()" style="width:auto;padding:6px 10px"><?= opts(CONTACT_STATUSES, $r['status']) ?></select></form><?php endif; ?></td>
 <td class="small"><?= e(mb_strimwidth((string)$r['next_action'], 0, 60, '…') ?: '—') ?><?= $r['follow_up'] ? '<br><span class="muted">Due ' . e(dt($r['follow_up'])) . '</span>' : '' ?></td>
 <td class="num"><a class="btn sm ghost" href="contact.php?id=<?= $r['id'] ?>">Manage</a></td></tr>
 <?php endforeach; if (!$rows): ?><tr><td colspan="6" class="muted">No contacts found.</td></tr><?php endif; ?></tbody></table></div></div>

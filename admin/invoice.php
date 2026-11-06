@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../lib/admin_ui.php'; require_admin(); require __DIR__ . '/_doc.php';
+require __DIR__ . '/../lib/admin_ui.php'; require_admin(); require_perm('docs.view'); require __DIR__ . '/_doc.php';
 $i = q1("SELECT * FROM invoices WHERE id=?", [(int)($_GET['id'] ?? 0)]);
 if (!$i) { http_response_code(404); exit('Invoice not found'); }
 $st = q1("SELECT * FROM students WHERE id=?", [$i['student_id']]);

@@ -1,5 +1,7 @@
 <?php
 require __DIR__ . '/../lib/admin_ui.php'; require_admin();
+require_perm('students.view');
+$canEdit = can('students.edit'); $canBill = can('billing.manage');
 $id = (int)($_GET['id'] ?? 0);
 $s = q1("SELECT * FROM students WHERE id=?", [$id]);
 if (!$s) { flash('Student not found.', 'err'); redirect('students.php'); }
@@ -27,6 +29,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     csrf_check();
     $a = post('action');
     $back = "student.php?id=$id";
+    // Server-side permission check for every action (the UI also hides buttons, but this is what enforces it)
+    $need = ['profile' => 'students.edit', 'application' => 'students.edit', 'add_invoice' => 'billing.manage', 'quick_plan' => 'billing.manage',
+             'cancel_invoice' => 'billing.manage', 'reopen_invoice' => 'billing.manage', 'add_payment' => 'billing.manage', 'payment_status' => 'billing.manage',
+             'delete_invoice' => 'billing.delete', 'delete_payment' => 'billing.delete', 'delete_student' => 'students.delete'];
+    if (!isset($need[$a])) deny();
+    require_perm($need[$a]);
     switch ($a) {
     case 'profile':
         $name = line(post('name', 120)); $email = line(post('email', 150)); $age = (int)post('age', 3);
@@ -125,9 +133,10 @@ admin_head($s['name'], 'students'); ?>
 <p><a href="students.php" class="muted">← All students</a></p>
 <div class="card" style="display:flex;gap:18px;flex-wrap:wrap;align-items:center;justify-content:space-between">
   <div><span class="sid"><?= e($s['student_code']) ?></span> &nbsp;<?= badge($s['status']) ?> <?= badge($t['label']) ?><br><span class="muted"><?= e($s['course_title']) ?> · applied <?= e(dt($s['created_at'])) ?></span></div>
-  <div class="totals" style="margin:0;min-width:min(100%,560px)"><div><small>Total due</small><b><?= e(money($t['due'])) ?></b></div><div><small>Invoiced</small><b><?= e(money($t['invoiced'])) ?></b></div><div><small>Paid</small><b><?= e(money($t['paid'])) ?></b></div><div class="bal"><small>Balance</small><b><?= e(money(max(0, $t['balance']))) ?></b></div></div>
+  <?php if (can('billing.view')): ?><div class="totals" style="margin:0;min-width:min(100%,560px)"><div><small>Total due</small><b><?= e(money($t['due'])) ?></b></div><div><small>Invoiced</small><b><?= e(money($t['invoiced'])) ?></b></div><div><small>Paid</small><b><?= e(money($t['paid'])) ?></b></div><div class="bal"><small>Balance</small><b><?= e(money(max(0, $t['balance']))) ?></b></div></div><?php endif; ?>
 </div>
 
+<?php if ($canEdit): ?>
 <div class="grid g2" style="margin-bottom:18px">
 <form method="post" class="card" style="margin:0"><?= csrf_field() ?><input type="hidden" name="action" value="profile"><h3>Student profile</h3>
   <div class="f"><label>Full name</label><input name="name" required value="<?= e($s['name']) ?>"></div>
@@ -148,16 +157,28 @@ admin_head($s['name'], 'students'); ?>
   <div class="f"><label>Admin notes</label><textarea name="notes"><?= e($s['notes']) ?></textarea></div>
   <button class="btn">Save application</button></form>
 </div>
+<?php else: ?>
+<div class="grid g2" style="margin-bottom:18px">
+  <div class="card" style="margin:0"><h3>Student profile <span class="muted small">(read-only)</span></h3><dl class="kv">
+    <dt>Name</dt><dd><?= e($s['name']) ?></dd><dt>Age / Sex</dt><dd><?= e($s['age']) ?> / <?= e($s['sex']) ?></dd><dt>Location</dt><dd><?= e($s['location']) ?></dd>
+    <dt>Email</dt><dd><?= e($s['email']) ?></dd><dt>Phone</dt><dd><?= e($s['phone']) ?></dd><dt>Course</dt><dd><?= e($s['course_title']) ?></dd></dl></div>
+  <div class="card" style="margin:0"><h3>Application <span class="muted small">(read-only)</span></h3><dl class="kv">
+    <dt>Status</dt><dd><?= badge($s['status']) ?></dd><dt>Payment plan</dt><dd><?= e($s['plan']) ?></dd>
+    <?php if (can('billing.view')): ?><dt>Course fee</dt><dd><?= e(money($s['fee'])) ?></dd><dt>Discount</dt><dd><?= e(money($s['discount'])) ?></dd><?php endif; ?></dl></div>
+</div>
+<?php endif; ?>
+<?php if (can('billing.view')): ?>
 
 <div class="card"><h3>Invoices</h3>
 <?php if ($invoices): ?><div class="tw"><table><thead><tr><th>Invoice</th><th>Description</th><th>Due</th><th class="num">Amount</th><th class="num">Paid</th><th>Status</th><th></th></tr></thead><tbody>
 <?php foreach ($invoices as $i): ?><tr><td><b><?= e($i['invoice_no']) ?></b></td><td><?= e($i['description']) ?></td><td class="muted small"><?= e(dt($i['due_date'])) ?></td>
 <td class="num"><?= e(money($i['amount'])) ?></td><td class="num"><?= e(money($i['st']['paid'])) ?></td><td><?= badge($i['st']['label']) ?></td>
 <td class="num"><div class="actions"><a class="btn sm ghost" target="_blank" href="invoice.php?id=<?= $i['id'] ?>">View / Print</a>
-<?php if ($i['status'] === 'Cancelled'): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="reopen_invoice"><input type="hidden" name="iid" value="<?= $i['id'] ?>"><button class="btn sm ghost">Re-open</button></form>
+<?php if (can('billing.delete') && !$i['st']['paid']): ?><form method="post" data-confirm="Delete this invoice permanently?"><?= csrf_field() ?><input type="hidden" name="action" value="delete_invoice"><input type="hidden" name="iid" value="<?= $i['id'] ?>"><button class="btn sm danger">Delete</button></form><?php endif; ?>
+<?php if (!$canBill): ?><?php elseif ($i['status'] === 'Cancelled'): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="reopen_invoice"><input type="hidden" name="iid" value="<?= $i['id'] ?>"><button class="btn sm ghost">Re-open</button></form>
 <?php else: ?><form method="post" data-confirm="Cancel this invoice?"><?= csrf_field() ?><input type="hidden" name="action" value="cancel_invoice"><input type="hidden" name="iid" value="<?= $i['id'] ?>"><button class="btn sm danger">Cancel</button></form><?php endif; ?></div></td></tr>
 <?php endforeach; ?></tbody></table></div><?php else: ?><p class="muted">No invoices yet. Create one below.</p><?php endif; ?>
-<div class="grid g2" style="margin-top:20px">
+<?php if ($canBill): ?><div class="grid g2" style="margin-top:20px">
   <form method="post" class="card" style="margin:0;background:var(--bg)"><?= csrf_field() ?><input type="hidden" name="action" value="quick_plan"><h3>Quick payment plan</h3>
     <p class="muted small" style="margin-top:-6px">Invoices the remaining <?= e(money(max(0, $t['due'] - $t['invoiced']))) ?> of the fee.</p>
     <div class="row"><div class="f"><label>Plan</label><select name="plan_type"><option value="full">Full payment (1 invoice)</option><option value="installments">Installments</option></select></div>
@@ -166,7 +187,7 @@ admin_head($s['name'], 'students'); ?>
   <form method="post" class="card" style="margin:0;background:var(--bg)"><?= csrf_field() ?><input type="hidden" name="action" value="add_invoice"><h3>Custom invoice</h3>
     <div class="f"><label>Description</label><input name="description" placeholder="Tuition: <?= e($s['course_title']) ?>"></div>
     <div class="row"><div class="f"><label>Amount (<?= e(setting('currency')) ?>)</label><input name="amount" inputmode="decimal" required></div><div class="f"><label>Due date</label><input type="date" name="due_date"></div></div><button class="btn dark">Create invoice</button></form>
-</div></div>
+</div><?php endif; ?></div>
 
 <div class="card"><h3>Payments &amp; receipts</h3>
 <?php if ($payments): ?><div class="tw"><table><thead><tr><th>Date</th><th>Invoice</th><th>Method / reference</th><th class="num">Amount</th><th>Status</th><th>Receipt</th><th></th></tr></thead><tbody>
@@ -174,12 +195,12 @@ admin_head($s['name'], 'students'); ?>
 <td><?= e($p['method']) ?><br><span class="muted small"><?= e($p['reference'] ?: '') ?></span></td><td class="num"><b><?= e(money($p['amount'])) ?></b></td><td><?= badge($p['status']) ?></td>
 <td><?= $p['receipt_no'] && $p['status'] === 'Confirmed' ? '<a class="btn sm ghost" target="_blank" href="receipt.php?id=' . $p['id'] . '">' . e($p['receipt_no']) . '</a>' : '<span class="muted small">—</span>' ?></td>
 <td class="num"><div class="actions">
-<?php if ($p['status'] !== 'Confirmed'): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="payment_status"><input type="hidden" name="pid" value="<?= $p['id'] ?>"><input type="hidden" name="to" value="Confirmed"><button class="btn sm">Confirm</button></form><?php endif; ?>
-<?php if ($p['status'] === 'Pending'): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="payment_status"><input type="hidden" name="pid" value="<?= $p['id'] ?>"><input type="hidden" name="to" value="Rejected"><button class="btn sm ghost">Reject</button></form><?php endif; ?>
-<?php if ($p['status'] === 'Confirmed'): ?><form method="post" data-confirm="Mark this payment Rejected? (e.g. it bounced or was entered by mistake)"><?= csrf_field() ?><input type="hidden" name="action" value="payment_status"><input type="hidden" name="pid" value="<?= $p['id'] ?>"><input type="hidden" name="to" value="Rejected"><button class="btn sm danger">Reverse</button></form><?php endif; ?>
-<?php if ($p['status'] !== 'Confirmed'): ?><form method="post" data-confirm="Delete this payment record?"><?= csrf_field() ?><input type="hidden" name="action" value="delete_payment"><input type="hidden" name="pid" value="<?= $p['id'] ?>"><button class="btn sm danger">Delete</button></form><?php endif; ?></div></td></tr>
+<?php if ($canBill && $p['status'] !== 'Confirmed'): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="payment_status"><input type="hidden" name="pid" value="<?= $p['id'] ?>"><input type="hidden" name="to" value="Confirmed"><button class="btn sm">Confirm</button></form><?php endif; ?>
+<?php if ($canBill && $p['status'] === 'Pending'): ?><form method="post"><?= csrf_field() ?><input type="hidden" name="action" value="payment_status"><input type="hidden" name="pid" value="<?= $p['id'] ?>"><input type="hidden" name="to" value="Rejected"><button class="btn sm ghost">Reject</button></form><?php endif; ?>
+<?php if ($canBill && $p['status'] === 'Confirmed'): ?><form method="post" data-confirm="Mark this payment Rejected? (e.g. it bounced or was entered by mistake)"><?= csrf_field() ?><input type="hidden" name="action" value="payment_status"><input type="hidden" name="pid" value="<?= $p['id'] ?>"><input type="hidden" name="to" value="Rejected"><button class="btn sm danger">Reverse</button></form><?php endif; ?>
+<?php if (can('billing.delete') && $p['status'] !== 'Confirmed'): ?><form method="post" data-confirm="Delete this payment record?"><?= csrf_field() ?><input type="hidden" name="action" value="delete_payment"><input type="hidden" name="pid" value="<?= $p['id'] ?>"><button class="btn sm danger">Delete</button></form><?php endif; ?></div></td></tr>
 <?php endforeach; ?></tbody></table></div><?php else: ?><p class="muted">No payments recorded yet.</p><?php endif; ?>
-<form method="post" class="card" style="margin:20px 0 0;background:var(--bg)"><?= csrf_field() ?><input type="hidden" name="action" value="add_payment"><h3>Record a payment</h3>
+<?php if ($canBill): ?><form method="post" class="card" style="margin:20px 0 0;background:var(--bg)"><?= csrf_field() ?><input type="hidden" name="action" value="add_payment"><h3>Record a payment</h3>
   <div class="row3 row"><div class="f"><label>Apply to invoice</label><select name="invoice_id"><option value="">On account (no invoice)</option>
     <?php foreach ($openInv as $i): ?><option value="<?= $i['id'] ?>"><?= e($i['invoice_no']) ?> — balance <?= e(money($i['st']['balance'])) ?></option><?php endforeach; ?></select></div>
   <div class="f"><label>Amount (<?= e(setting('currency')) ?>)</label><input name="amount" inputmode="decimal" required value="<?= $openInv ? e($openInv[0]['st']['balance']) : '' ?>"></div>
@@ -188,8 +209,23 @@ admin_head($s['name'], 'students'); ?>
   <div class="f"><label>Reference / teller no.</label><input name="reference"></div>
   <div class="f"><label>Status</label><select name="pstatus"><option value="Confirmed">Confirmed — generate receipt now</option><option value="Pending">Pending — confirm later</option></select></div></div>
   <div class="f"><label>Note (optional)</label><input name="note"></div>
-  <button class="btn">Save payment</button></form></div>
+  <button class="btn">Save payment</button></form><?php endif; ?></div>
+<?php endif; /* billing.view */ ?>
+
+<?php if (can('tasks.viewall')): $stasks = q("SELECT t.*, a.name aname, a.title atitle FROM tasks t LEFT JOIN admins a ON a.id=t.assigned_to WHERE t.student_id=? ORDER BY t.id", [$id]); ?>
+<div class="card"><h3>Tasks for this student</h3>
+<?php if ($stasks): ?><div class="tw"><table><thead><tr><th>Task</th><th>Assigned to</th><th>Status</th><th></th></tr></thead><tbody>
+<?php foreach ($stasks as $k): ?><tr><td><a href="task.php?id=<?= $k['id'] ?>"><b><?= e($k['title']) ?></b></a><?= $k['due_date'] ? '<br><span class="muted small">Due ' . e(dt($k['due_date'])) . '</span>' : '' ?></td>
+<td><?php if (is_super()): ?><form method="post" action="task.php" style="display:flex;gap:6px;margin:0"><?= csrf_field() ?><input type="hidden" name="action" value="assign"><input type="hidden" name="id" value="<?= $k['id'] ?>"><input type="hidden" name="due_date" value="<?= e($k['due_date']) ?>"><input type="hidden" name="back" value="student.php?id=<?= $id ?>">
+<select name="assignee" style="min-width:190px"><?= staff_options($k['assigned_to'] ? (int)$k['assigned_to'] : null, 'Not assigned') ?></select><button class="btn sm dark">Save</button></form>
+<?php else: ?><?= $k['aname'] ? e($k['aname']) . ' <span class="muted small">' . e($k['atitle']) . '</span>' : '<span class="muted">Nobody yet</span>' ?><?php endif; ?></td>
+<td><?= badge($k['status']) ?></td><td class="num"><a class="btn sm ghost" href="task.php?id=<?= $k['id'] ?>">Open</a></td></tr>
+<?php endforeach; ?></tbody></table></div><?php else: ?><p class="muted">No tasks yet.</p><?php endif; ?>
+<?php if (is_super()): ?><form method="post" action="task.php" class="card" style="margin:16px 0 0;background:var(--bg)"><?= csrf_field() ?><input type="hidden" name="action" value="create"><input type="hidden" name="student_id" value="<?= $id ?>"><input type="hidden" name="back" value="student.php?id=<?= $id ?>"><h3>Add &amp; assign a task</h3>
+<div class="row3 row"><div class="f"><label>Task</label><input name="title" required placeholder="e.g. Send welcome pack and class schedule"></div><div class="f"><label>Assign to</label><select name="assignee"><?= staff_options(null, 'Not assigned yet') ?></select></div><div class="f"><label>Due date</label><input type="date" name="due_date"></div></div>
+<div class="f"><label>Instructions (optional)</label><input name="details"></div><button class="btn dark">Create task</button></form><?php endif; ?></div>
+<?php endif; ?>
 
 <div class="grid g2"><div><?php activity_box('student', $id); ?></div>
-<div><form method="post" class="card" data-confirm="Delete this student and all invoices? This cannot be undone."><?= csrf_field() ?><input type="hidden" name="action" value="delete_student"><h3>Danger zone</h3><p class="muted small">Students with confirmed payments cannot be deleted; set the status to Withdrawn instead.</p><button class="btn danger sm">Delete student</button></form></div></div>
+<div><?php if (can('students.delete')): ?><form method="post" class="card" data-confirm="Delete this student and all invoices? This cannot be undone."><?= csrf_field() ?><input type="hidden" name="action" value="delete_student"><h3>Danger zone</h3><p class="muted small">Students with confirmed payments cannot be deleted; set the status to Withdrawn instead.</p><button class="btn danger sm">Delete student</button></form><?php endif; ?></div></div>
 <?php admin_foot();

@@ -1,5 +1,5 @@
 <?php
-require __DIR__ . '/../lib/admin_ui.php'; require_admin();
+require __DIR__ . '/../lib/admin_ui.php'; require_admin(); require_perm('students.view');
 $fs = $_GET['status'] ?? ''; $fc = (int)($_GET['course'] ?? 0); $fq = trim($_GET['q'] ?? '');
 $where = []; $p = [];
 if (in_array($fs, STUDENT_STATUSES, true)) { $where[] = 's.status=?'; $p[] = $fs; }
@@ -14,7 +14,7 @@ admin_head('Students & applications', 'students'); ?>
 <form class="bar" method="get"><?php if ($fs): ?><input type="hidden" name="status" value="<?= e($fs) ?>"><?php endif; ?>
 <input class="grow" name="q" placeholder="Search name, student ID, email, phone, location…" value="<?= e($fq) ?>">
 <select name="course"><option value="">All courses</option><?php foreach ($courses as $c): ?><option value="<?= $c['id'] ?>" <?= $fc === (int)$c['id'] ? 'selected' : '' ?>><?= e($c['title']) ?></option><?php endforeach; ?></select>
-<button class="btn dark">Filter</button><a class="btn" href="student-new.php">+ Add student</a></form>
+<button class="btn dark">Filter</button><?php if (can('students.create')): ?><a class="btn" href="student-new.php">+ Add student</a><?php endif; ?></form>
 <div class="card"><div class="tw"><table><thead><tr><th>Student ID</th><th>Name</th><th>Course</th><th>Applied</th><th>Status</th><th>Payment</th><th class="num">Balance</th><th></th></tr></thead><tbody>
 <?php foreach ($rows as $s): $t = student_totals($s); ?><tr>
 <td><span class="muted small"><b><?= e($s['student_code']) ?></b></span></td>

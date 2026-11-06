@@ -1,7 +1,7 @@
 <?php
-require __DIR__ . '/../lib/admin_ui.php'; require_admin();
+require __DIR__ . '/../lib/admin_ui.php'; require_admin(); require_perm('courses.view');
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    csrf_check();
+    csrf_check(); require_perm('courses.edit');
     $id = (int)post('id');
     if (post('action') === 'toggle' && ($c = q1("SELECT * FROM courses WHERE id=?", [$id]))) {
         run("UPDATE courses SET active=? WHERE id=?", [$c['active'] ? 0 : 1, $id]);

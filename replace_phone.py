@@ -15,6 +15,7 @@ REPLACEMENTS = [
     ("+234 810 370 2504", "+234 813 964 5973"),   # display format
     ("+2348103702504",    "+2348139645973"),      # tel: links
     ("08103702504",       "08139645973"),          # local format
+    ("234810372504",      "2348139645973"),        # variant without the extra 0
 ]
 SKIP_DIRS = {".git", "node_modules", "data", "__pycache__"}
 EXTS = {".html", ".php", ".js", ".css", ".py", ".md", ".txt", ".json", ".xml", ".toml"}

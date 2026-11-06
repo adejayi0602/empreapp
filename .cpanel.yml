@@ -1,5 +1,5 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/qrtbhscacw/public_html/
+    - export DEPLOYPATH=/home/qrtbhscacw/empretechnologies.com.ng
     - /usr/bin/find . -mindepth 1 -maxdepth 1 ! -name '.git' ! -name '.cpanel.yml' -exec /bin/cp -R {} "$DEPLOYPATH" \;

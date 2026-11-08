@@ -41,13 +41,22 @@ admin account(s) you already have become **Super Admin**. Then add your staff.
 * Use HTTPS. Use a strong admin password (10+ characters).
 
 ## What's in it
-Public: index.html, about.html, services.html, contact.html (all static) + training.php, course.php, enroll.php, enroll-success.php.
-Admin (/admin): Dashboard, Contacts (status + next action), Students (profile, application, plan, invoices, payments), Courses (add/edit/hide), Settings.
+Public: index.php, about.php, services.php, contact.php, training.php, course.php, enroll.php, enroll-success.php (old .html addresses redirect via the root .htaccess).
+Admin (/admin): Dashboard, Contacts (status + next action), Students (profile, application, plan, invoices, payments), Courses (add/edit/hide), **Services (Super Admin only: add/edit/hide/delete service areas and services)**, Staff, Tasks, Settings.
 Student ID format EMP-YYYY-NNNN · Invoices INV-YYYY-NNNN · Receipts REC-YYYY-NNNN (receipt is created when a payment is Confirmed).
 
-## Editing the static pages
-Change content at the top of `build.py`, run `python3 build.py`, re-upload. Hero images: `assets/img/hero-1..5.svg`.
+## Services are managed in the admin
+Admin > Services controls what appears on Home, Our Services, the footer and the contact form's service list. No code or re-upload needed.
+The first time the site runs it loads the portfolio from the Enhanced Company Profile; after that the Super Admin owns it.
+
+## Editing brand copy (tagline, positioning, values, process)
+Change the text in `build.py`, run `python3 build.py`, re-upload. Hero images: `assets/img/hero-1..5.svg`.
 Social links: replace the "#" URLs in the SOCIAL list in `build.py`.
 
 ## Local preview
 `php -S localhost:8000` in this folder, then open http://localhost:8000
+
+## Upgrading an existing live site to this version (services in the admin)
+1. Upload everything (keep your existing `data/` folder and `config.php` values; do not overwrite your database).
+2. Delete the old `index.html`, `about.html`, `services.html`, `contact.html` from the live site. The new `.php` pages replace them and the root `.htaccess` forwards the old addresses.
+3. Open any page once. The new services tables are created and filled automatically, then sign in as Super Admin > Services.

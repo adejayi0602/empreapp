@@ -7,14 +7,14 @@ $courses = active_courses();
 include __DIR__ . '/inc/head.php';
 ?>
 <section class="banner"><div class="container">
-  <div class="crumbs"><a href="index.html">Home</a><span>/</span><span class="cur">Training</span></div>
-  <h1>Training</h1><p>Virtual or in-person capacity-building programmes for individuals, users and IT staff.</p>
+  <div class="crumbs"><a href="index.php">Home</a><span>/</span><span class="cur">Training</span></div>
+  <h1>Training</h1><p>Technology Training &amp; Development: practical learning designed to build confidence, capability and career-ready skills, delivered virtually or in person.</p>
 </div></section>
 
 <section class="section"><div class="container">
   <div class="sec-head center reveal"><span class="eyebrow">Our Courses</span><h2>Choose a course and start learning</h2>
   <p>Select a course to view what you will learn and complete your enrolment online. Every applicant receives a unique student ID.</p></div>
-  <?php if (!$courses): ?><p style="text-align:center">New courses are coming soon. Please <a href="contact.html" style="color:var(--brand);font-weight:700">contact us</a> for details.</p><?php endif; ?>
+  <?php if (!$courses): ?><p style="text-align:center">New courses are coming soon. Please <a href="contact.php" style="color:var(--brand);font-weight:700">contact us</a> for details.</p><?php endif; ?>
   <div class="cards-3">
   <?php foreach ($courses as $i => $c): ?>
     <a class="card course reveal d<?= $i % 3 ?>" href="course.php?c=<?= e($c['slug']) ?>">
@@ -44,6 +44,6 @@ include __DIR__ . '/inc/head.php';
 
 <div class="cta-wrap"><div class="container"><div class="cta reveal">
   <div class="txt"><h2>Training for your whole team?</h2><p>Tell us about your organisation and we will tailor a programme for your users and IT staff.</p></div>
-  <a class="btn btn-white" href="contact.html">Contact Us <svg class="ic" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
+  <a class="btn btn-white" href="contact.php">Contact Us <svg class="ic" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a>
 </div></div></div>
 <?php include __DIR__ . '/inc/foot.php'; ?>

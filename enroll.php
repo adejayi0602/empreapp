@@ -36,7 +36,7 @@ include __DIR__ . '/inc/head.php';
 $err = fn($k) => isset($errors[$k]) ? '<span class="req-err">' . e($errors[$k]) . '</span>' : '';
 ?>
 <section class="banner"><div class="container">
-  <div class="crumbs"><a href="index.html">Home</a><span>/</span><a href="training.php">Training</a><span>/</span><span class="cur">Enrol</span></div>
+  <div class="crumbs"><a href="index.php">Home</a><span>/</span><a href="training.php">Training</a><span>/</span><span class="cur">Enrol</span></div>
   <h1>Enrol for a course</h1><p>Complete the form below. Your unique student ID is generated as soon as you submit.</p>
 </div></section>
 <section class="section"><div class="container enrol-wrap">

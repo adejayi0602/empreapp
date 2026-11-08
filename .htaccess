@@ -1,0 +1,11 @@
+# Empre Technologies — root rules (Apache / cPanel)
+DirectoryIndex index.php index.html
+
+<IfModule mod_rewrite.c>
+RewriteEngine On
+# The public pages are now PHP. Old .html addresses (bookmarks, Google) forward to the new ones.
+RewriteRule ^index\.html$    index.php    [R=301,L]
+RewriteRule ^about\.html$    about.php    [R=301,L]
+RewriteRule ^services\.html$ services.php [R=301,L]
+RewriteRule ^contact\.html$  contact.php  [R=301,L]
+</IfModule>

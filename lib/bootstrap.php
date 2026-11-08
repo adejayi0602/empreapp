@@ -87,6 +87,13 @@ function migrate(PDO $pdo): void {
         created_by TEXT, created_at TEXT, assigned_at TEXT, updated_at TEXT, completed_at TEXT, completed_by TEXT);
     CREATE TABLE IF NOT EXISTS task_comments(
         id INTEGER PRIMARY KEY, task_id INTEGER NOT NULL REFERENCES tasks(id) ON DELETE CASCADE, admin_id INTEGER, author TEXT, body TEXT NOT NULL, created_at TEXT);
+    CREATE TABLE IF NOT EXISTS service_areas(
+        id INTEGER PRIMARY KEY, slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, tagline TEXT, summary TEXT, outcome TEXT, icon TEXT DEFAULT 'spark',
+        active INTEGER DEFAULT 1, sort INTEGER DEFAULT 0, created_at TEXT);
+    CREATE TABLE IF NOT EXISTS services(
+        id INTEGER PRIMARY KEY, area_id INTEGER NOT NULL REFERENCES service_areas(id), slug TEXT NOT NULL UNIQUE, title TEXT NOT NULL, icon TEXT DEFAULT 'spark',
+        short TEXT, description TEXT, points TEXT, cta_label TEXT, cta_url TEXT, active INTEGER DEFAULT 1, sort INTEGER DEFAULT 0, created_at TEXT, updated_at TEXT);
+    CREATE INDEX IF NOT EXISTS ix_svc_area ON services(area_id);
     CREATE INDEX IF NOT EXISTS ix_task_assignee ON tasks(assigned_to, status);
     CREATE INDEX IF NOT EXISTS ix_task_student ON tasks(student_id);
     CREATE INDEX IF NOT EXISTS ix_task_comments ON task_comments(task_id);
@@ -101,6 +108,11 @@ function migrate(PDO $pdo): void {
     if (!$pdo->query("SELECT 1 FROM settings WHERE k='seeded'")->fetch()) {
         seed_courses($pdo);
         $pdo->exec("INSERT OR IGNORE INTO settings(k,v) VALUES('seeded','1')");
+    }
+    // Service portfolio (Enhanced Company Profile). Seeded once; after that the Super Admin owns it.
+    if (!$pdo->query("SELECT 1 FROM settings WHERE k='services_seeded'")->fetch()) {
+        if (!(int)$pdo->query("SELECT COUNT(*) FROM service_areas")->fetchColumn()) seed_services($pdo);
+        $pdo->exec("INSERT OR IGNORE INTO settings(k,v) VALUES('services_seeded','1')");
     }
 }
 
@@ -243,3 +255,5 @@ function admin_label(?int $id): string {
     $a = $id ? q1("SELECT name,title FROM admins WHERE id=?", [$id]) : null;
     return $a ? $a['name'] . ($a['title'] ? ' (' . $a['title'] . ')' : '') : 'Unknown';
 }
+
+require_once __DIR__ . '/services.php';

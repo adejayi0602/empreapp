@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
-"""Generates the static pages + hero artwork. Run:  python3 build.py
-Edit the CONTENT below, re-run, upload the folder. (Admin dashboard can replace this later.)"""
+"""Generates the public PHP pages, header/footer partials and hero artwork. Run:  python3 build.py
+Services are NOT edited here: they are managed in Admin > Services (database).
+This file holds the brand copy (tagline, positioning, values, process, customers)."""
 import os, math, random
 
 ROOT = os.path.dirname(os.path.abspath(__file__))
 EMAIL = "info@empretechnologies.com.ng"
 PHONE_DISPLAY = "+234 813 964 5973"
 PHONE_TEL = "+2348139645973"
-WEBSITE = "www.empretechnologies.com"
+WEBSITE = "empretechnologies.com.ng"
 INSTAGRAM_URL = "https://www.instagram.com/empre_technologies"
 LINKEDIN_URL = "https://www.linkedin.com/company/empre-technologies"
 INSTAGRAM_HANDLE = "@empre_technologies"
@@ -43,6 +44,8 @@ ICONS = {
  "clock": '<circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>',
  "layers": '<path d="m12 2 10 6-10 6L2 8z"/><path d="m2 16 10 6 10-6"/>',
  "user": '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+ "chart": '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/>',
+ "compass": '<circle cx="12" cy="12" r="10"/><path d="m16 8-2 6-6 2 2-6z"/>',
  "server": '<rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/>',
 }
 def ic(name, cls="ic"):
@@ -51,47 +54,21 @@ SPRITE = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"
     f'<symbol id="i-{k}" viewBox="0 0 24 24">{v}</symbol>' for k, v in ICONS.items()) + '</defs></svg>'
 
 # ------------------------------------------------------------------ content
-SERVICES = [
- dict(id="technical-support", icon="wrench", title="Technical Support", new=False,
-      short="Ongoing remote or on-site support for resolving system and user issues within Microsoft environments.",
-      long="Ongoing remote or on-site support for resolving system and user issues within Microsoft environments. When something breaks, your team gets a responsive, knowledgeable partner who solves complex IT issues quickly.",
-      points=["Troubleshooting for systems and users", "Account recovery", "Email issues and more", "Remote or on-site support"]),
- dict(id="microsoft-365", icon="cloud", title="Microsoft 365 Solution Implementation", new=False,
-      short="Deployment and configuration of Exchange Online, SharePoint, OneDrive, Teams and Entra ID.",
-      long="We deploy and configure Microsoft 365 services like Exchange Online, SharePoint, OneDrive, Teams, and Entra ID, so your people can collaborate better and your business runs on modern digital tools.",
-      points=["Assessment", "Setup and configuration", "Migration", "Training for your team"]),
- dict(id="endpoint-security", icon="shield", title="Endpoint Management & Security", new=False,
-      short="User device management and protection with Microsoft Intune, Defender for Endpoint and ZOHO Endpoint Central.",
-      long="User device management and protection using Microsoft Intune and Defender for Endpoint, and ZOHO Endpoint Central. We secure your devices and infrastructure against modern threats.",
-      points=["Policy enforcement", "Real-time threat detection", "Reporting", "Microsoft Intune, Defender for Endpoint & ZOHO Endpoint Central"]),
- dict(id="training", icon="grad", title="Training", new=False,
-      short="Virtual or in-person technological capacity-building for users and IT staff.",
-      long="A virtual or in-person technological capacity-building programme that helps your team thrive with modern technologies, from everyday users to dedicated IT staff.",
-      points=["Admin tasks", "Security awareness", "Certification tracks for users and IT staff", "Virtual or in-person delivery"]),
- dict(id="website-design", icon="monitor", title="Website Design", new=True,
-      short="Modern, responsive websites that present your business professionally on every device.",
-      long="Modern, responsive and conversion-focused websites that present your business professionally on every device, designed around your audience and your goals.",
-      points=["Custom, brand-led design", "Mobile-first responsive layouts", "Clear structure and SEO-ready pages", "Fast, accessible experiences"]),
- dict(id="web-app-development", icon="code", title="Web & Application Development", new=True,
-      short="Custom web platforms, portals and applications that are secure, fast and built to scale.",
-      long="Custom web platforms, business portals and applications built with modern technologies. Secure, fast and scalable, and ready to grow with your business.",
-      points=["Custom web applications and portals", "Dashboards and admin systems", "Integrations with the tools you use", "Ongoing maintenance and support"]),
- dict(id="product-design", icon="pen", title="Product Design", new=True,
-      short="UX research, wireframes, prototypes and polished interfaces for digital products people love to use.",
-      long="From idea to interface: we research, wireframe and prototype digital products, then polish them into interfaces that people find simple and enjoyable to use.",
-      points=["UX research and user flows", "Wireframes and clickable prototypes", "UI design systems", "Design hand-off to development"]),
- dict(id="branding", icon="spark", title="Branding", new=True,
-      short="Logos, visual identity and brand guidelines that make your business memorable and consistent.",
-      long="Logos, visual identity and brand guidelines that make your business memorable, and keep it consistent across print, web and social media.",
-      points=["Logo and visual identity", "Colour and typography systems", "Brand guidelines", "Social media and marketing collateral"]),
-]
-WHAT_WE_DO = [
- ("headset", "Solve complex IT issues", "with responsive support"),
- ("handshake", "Deploy Microsoft 365", "and other digital tools to boost collaboration"),
- ("shield", "Secure devices and infrastructure", "against modern threats"),
- ("grad", "Train your team to thrive", "with modern technologies"),
-]
-NAV = [("index.html", "Home"), ("about.html", "About Us"), ("services.html", "Our Services"), ("training.php", "Training"), ("contact.html", "Contact")]
+
+# ------------------------------------------------------------------ content (brand + positioning)
+# Services themselves are NOT here any more: they live in the database and are managed by the
+# Super Admin in Admin > Services. Everything below is brand copy from the Enhanced Company Profile.
+TAGLINE = "Technology that empowers businesses to grow."
+DESCRIPTOR = "IT • Cloud • Cybersecurity • Digital Solutions • Training"
+VALUES_LINE = "Innovation • Excellence • Integrity • Client Success"
+NAV = [("index.php", "Home"), ("about.php", "About Us"), ("services.php", "Our Services"), ("training.php", "Training"), ("contact.php", "Contact")]
+
+def phpq(s):
+    return "'" + s.replace("\\", "\\\\").replace("'", "\\'") + "'"
+
+def icp(v):
+    """icon from a database row held in PHP variable v"""
+    return f'<svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-<?= e(svc_icon({v}[\'icon\'])) ?>"/></svg>'
 
 # ------------------------------------------------------------------ shared chunks
 def head(title, desc, page):
@@ -107,7 +84,7 @@ def head(title, desc, page):
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css">
+<link rel="stylesheet" href="assets/css/style.css?v=3">
 </head>
 <body>
 {SPRITE}
@@ -115,19 +92,16 @@ def head(title, desc, page):
 '''
 
 def logo():
-    return '''<a class="logo" href="index.html" aria-label="Empre Technologies — home">
+    return '''<a class="logo" href="index.php" aria-label="Empre Technologies — home">
         <img src="assets/img/logo-icon.png" alt="" width="54" height="50">
         <span class="logo-text"><b>Empre</b><small>TECHNOLOGIES</small></span>
       </a>'''
 
-def social_links(cls_items=""):
+def social_links():
     return "".join(f'<a href="{u}" aria-label="{n}" target="_blank" rel="noopener">{ic(k)}</a>' for k, n, u in SOCIAL)
 
-def header(active, php=False):
-    if php:
-        links = "".join(f'<li><a class="link<?= ($active ?? "")==="{h}" ? " active" : "" ?>" href="{h}">{t}</a></li>' for h, t in NAV)
-    else:
-        links = "".join(f'<li><a class="link{" active" if h==active else ""}" href="{h}">{t}</a></li>' for h, t in NAV)
+def header(active=None, php=False):
+    links = "".join(f'<li><a class="link<?= ($active ?? "")==="{h}" ? " active" : "" ?>" href="{h}">{t}</a></li>' for h, t in NAV)
     return f'''<div class="topbar"><div class="container">
   <ul>
     <li><a href="mailto:{EMAIL}">{ic("mail")}{EMAIL}</a></li>
@@ -140,8 +114,13 @@ def header(active, php=False):
   <nav class="nav" id="nav" aria-label="Main">
     <button class="nav-close" aria-label="Close menu">{ic("close")}</button>
     <ul>{links}</ul>
+    <div class="nav-extra">
+      <a class="btn btn-primary" href="contact.php">Get a Quote {ic("arrow")}</a>
+      <a class="nav-phone" href="tel:{PHONE_TEL}">{ic("phone")}{PHONE_DISPLAY}</a>
+      <div class="nav-social">{social_links()}</div>
+    </div>
   </nav>
-  <a class="btn btn-primary btn-sm" href="contact.html">Get a Quote {ic("arrow")}</a>
+  <a class="btn btn-primary btn-sm" href="contact.php">Get a Quote {ic("arrow")}</a>
   <button class="menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="nav">{ic("menu")}</button>
 </div></header>
 <div class="scrim"></div>
@@ -150,17 +129,18 @@ def header(active, php=False):
 
 def footer():
     q = "".join(f'<li><a href="{h}">{ic("arrow")}{t}</a></li>' for h, t in NAV)
-    s = "".join(f'<li><a href="services.html#{x["id"]}">{ic("arrow")}{x["title"].replace(" Solution Implementation","")}</a></li>' for x in SERVICES)
+    svc = ('<?php $__fs = function_exists("site_services") ? site_services() : []; foreach ($__fs as $__s): ?>'
+           f'<li><a href="services.php#<?= e($__s[\'slug\']) ?>">{ic("arrow")}<?= e($__s[\'title\']) ?></a></li><?php endforeach; ?>')
     return f'''</main>
 <footer class="footer">
   <div class="container footer-main">
     <div>
       {logo()}
-      <p style="margin-top:22px;max-width:340px">A forward-thinking IT solutions company delivering scalable, secure and intelligent technology services tailored to the needs of modern businesses.</p>
+      <p style="margin-top:22px;max-width:340px"><b style="color:#fff">{TAGLINE}</b><br>A technology solutions company helping businesses and individuals with IT infrastructure, cloud, cybersecurity, software, digital design and professional training.</p>
       <div class="f-social">{social_links()}</div>
     </div>
     <div><h4>Menu</h4><ul>{q}</ul></div>
-    <div><h4>Our Services</h4><ul>{s}</ul></div>
+    <div><h4>Our Services</h4><ul>{svc}</ul></div>
     <div><h4>Contact Us</h4>
       <ul class="contact-list">
         <li>{ic("mail")}<a href="mailto:{EMAIL}">{EMAIL}</a></li>
@@ -172,8 +152,8 @@ def footer():
     </div>
   </div>
   <div class="footer-bottom"><div class="container">
-    <span>&copy; <span data-year>2026</span> Empre Technologies Ltd. All rights reserved.</span>
-    <span><a href="index.html">Home</a> &nbsp;·&nbsp; <a href="about.html">About</a> &nbsp;·&nbsp; <a href="services.html">Services</a> &nbsp;·&nbsp; <a href="contact.html">Contact</a></span>
+    <span>&copy; <span data-year>2026</span> Empre Technologies Ltd. All rights reserved. &nbsp;|&nbsp; {VALUES_LINE}</span>
+    <span><a href="index.php">Home</a> &nbsp;·&nbsp; <a href="about.php">About</a> &nbsp;·&nbsp; <a href="services.php">Services</a> &nbsp;·&nbsp; <a href="training.php">Training</a> &nbsp;·&nbsp; <a href="contact.php">Contact</a></span>
   </div></div>
 </footer>
 <button class="to-top" aria-label="Back to top">{ic("arrow")}</button>
@@ -182,167 +162,210 @@ def footer():
 </html>
 '''
 
-def cta(title="Ready to move your business forward?", sub="Whether you're a startup or a growing enterprise, Empre is your IT partner for the journey ahead."):
+def cta(title="Make technology work for your business.", sub="Talk to Empre Technologies about your next project, support requirement or training need."):
     return f'''<div class="cta-wrap"><div class="container"><div class="cta reveal">
   <div class="txt"><h2>{title}</h2><p>{sub}</p></div>
-  <a class="btn btn-white" href="contact.html">Contact Us {ic("arrow")}</a>
+  <a class="btn btn-white" href="contact.php">Get in Touch {ic("arrow")}</a>
 </div></div></div>'''
 
 def banner(title, crumb, sub):
     return f'''<section class="banner"><div class="container">
-  <div class="crumbs"><a href="index.html">Home</a><span>/</span><span class="cur">{crumb}</span></div>
+  <div class="crumbs"><a href="index.php">Home</a><span>/</span><span class="cur">{crumb}</span></div>
   <h1>{title}</h1><p>{sub}</p>
 </div></section>
 '''
 
 def who_we_are_split(button=True):
-    btn = f'<a class="btn btn-primary" href="about.html">Learn more about us {ic("arrow")}</a>' if button else ""
+    btn = f'<a class="btn btn-primary" href="about.php">Learn more about us {ic("arrow")}</a>' if button else ""
     return f'''<section class="section"><div class="container split">
   <div class="visual reveal">
     <div class="panel"></div>
     <div class="mark"><img src="assets/img/logo-icon.png" alt="Empre Technologies logo mark"></div>
-    <div class="float f2"><span class="ico">{ic("shield")}</span><div><b>Secure</b><small>Devices &amp; infrastructure</small></div></div>
-    <div class="float f1"><span class="ico">{ic("cloud")}</span><div><b>Scalable</b><small>Cloud productivity</small></div></div>
+    <div class="float f2"><span class="ico">{ic("shield")}</span><div><b>Protect</b><small>Systems, devices &amp; data</small></div></div>
+    <div class="float f1"><span class="ico">{ic("cloud")}</span><div><b>Enable</b><small>Reliable digital foundations</small></div></div>
   </div>
   <div class="reveal d1">
     <span class="eyebrow">Who We Are</span>
-    <h2>Forward-thinking IT solutions for modern businesses</h2>
-    <p>We are a forward-thinking IT solutions company that delivers scalable, secure, and intelligent technology services tailored to the needs of modern businesses.</p>
-    <p>From technical support and endpoint security to cloud productivity and hands-on training, Empre helps companies run smoother and grow faster.</p>
+    <h2>A technology partner for organisations and individuals navigating a digital world</h2>
+    <p>We are a forward-thinking technology solutions company delivering scalable, secure and practical services tailored to the needs of modern businesses.</p>
+    <p>From responsive technical support and modern workplace solutions to digital product development and hands-on training, we help clients solve technology challenges and make progress with confidence.</p>
     <ul class="checks" style="margin:26px 0 34px">
-      <li><span class="tick">{ic("check")}</span><span><b>Scalable &amp; secure.</b> Technology that grows with you and protects what matters.</span></li>
-      <li><span class="tick">{ic("check")}</span><span><b>Intelligent &amp; tailored.</b> Solutions shaped around your business, not a template.</span></li>
+      <li><span class="tick">{ic("check")}</span><span><b>Businesses.</b> Technology support, transformation and digital delivery.</span></li>
+      <li><span class="tick">{ic("check")}</span><span><b>Startups.</b> Digital foundations, product design and development.</span></li>
+      <li><span class="tick">{ic("check")}</span><span><b>Teams.</b> Workplace productivity, security and capability building.</span></li>
+      <li><span class="tick">{ic("check")}</span><span><b>Individuals.</b> Practical technology training and career development.</span></li>
     </ul>
     {btn}
   </div>
 </div></section>'''
 
-def what_we_do():
-    cards = "".join(f'''<div class="card reveal d{i%4}"><span class="num">0{i+1}</span><div class="ico">{ic(icn)}</div><h3>{t}</h3><p>{s}</p></div>''' for i, (icn, t, s) in enumerate(WHAT_WE_DO))
-    return f'''<section class="section soft"><div class="container">
-  <div class="sec-head center reveal"><span class="eyebrow">What We Do</span><h2>Technology that keeps your business moving</h2>
-  <p>Practical IT services, from everyday support to security and training, delivered by people who understand your business.</p></div>
-  <div class="cards-4">{cards}</div>
+def positioning(soft=True):
+    p = [("layers", "Enable", "Build reliable digital foundations."), ("shield", "Protect", "Secure systems, devices and data."), ("users", "Empower", "Develop products, people and capability.")]
+    cards = "".join(f'<div class="pillar light reveal d{i+1}"><div class="ico">{ic(a)}</div><h3>{b}</h3><p>{c}</p></div>' for i, (a, b, c) in enumerate(p))
+    return f'''<section class="section{" soft" if soft else ""}"><div class="container">
+  <div class="sec-head center reveal"><span class="eyebrow">Our Positioning</span><h2>{TAGLINE}</h2>
+  <p>Empre Technologies is a technology solutions company helping businesses transform their operations through IT infrastructure, cloud solutions, cybersecurity, software development, digital design and professional technology training.</p></div>
+  <div class="pillars">{cards}</div>
+  <p class="lead-note reveal">We combine technical expertise, innovation and practical business understanding to help organisations operate efficiently, protect their digital assets and scale with confidence.</p>
 </div></section>'''
 
-def services_grid():
-    cards = "".join(f'''<a class="card reveal d{i%4}{" is-new" if s["new"] else ""}" href="services.html#{s["id"]}"><div class="ico">{ic(s["icon"])}</div><h3>{s["title"]}</h3><p>{s["short"]}</p><span class="more">Learn more {ic("arrow")}</span></a>''' for i, s in enumerate(SERVICES))
-    return f'''<section class="section"><div class="container">
-  <div class="sec-head center reveal"><span class="eyebrow">Our Services</span><h2>Everything your business needs to run, grow and look its best</h2>
-  <p>IT support, cloud and security, plus design and software development, all from one trusted team.</p></div>
-  <div class="cards-4 services">{cards}</div>
-  <div style="text-align:center;margin-top:48px"><a class="btn btn-dark" href="services.html">View all services {ic("arrow")}</a></div>
-</div></section>'''
+def what_we_do(soft=False):
+    card = ('<a class="card reveal d<?= $__i % 4 ?>" href="services.php#<?= e($a[\'slug\']) ?>"><span class="num"><?= sprintf(\'%02d\', $__i + 1) ?></span>'
+            f'<div class="ico">{icp("$a")}</div><h3><?= e($a[\'title\']) ?></h3><p><?= e($a[\'summary\']) ?></p><span class="more">Explore {ic("arrow")}</span></a>')
+    return ('<?php $__areas = site_areas(); ?>\n'
+            f'<section class="section{" soft" if soft else ""}"><div class="container">\n'
+            '  <div class="sec-head center reveal"><span class="eyebrow">What We Do</span><h2>Integrated technology services</h2>\n'
+            '  <p>Connected service areas designed to support the full technology journey. Scope can be tailored to your project requirements, business size and operational needs.</p></div>\n'
+            '  <div class="cards-4"><?php foreach ($__areas as $__i => $a): ?>' + card + '<?php endforeach; ?></div>\n</div></section>')
+
+def services_grid(soft=True):
+    card = ('<a class="card reveal d<?= $__i % 4 ?>" href="services.php#<?= e($s[\'slug\']) ?>">'
+            f'<div class="ico">{icp("$s")}</div><h3><?= e($s[\'title\']) ?></h3><p><?= e($s[\'short\']) ?></p><span class="more">Learn more {ic("arrow")}</span></a>')
+    return ('<?php $__svcs = site_services(); ?>\n'
+            f'<section class="section{" soft" if soft else ""}"><div class="container">\n'
+            '  <div class="sec-head center reveal"><span class="eyebrow">Our Services</span><h2>Everything from reliable IT to digital products and training</h2>\n'
+            '  <p>IT, cloud and cybersecurity, software and digital solutions, training and consulting, from one connected partner.</p></div>\n'
+            '  <div class="cards-3"><?php foreach ($__svcs as $__i => $s): ?>' + card + '<?php endforeach; ?></div>\n'
+            f'  <div style="text-align:center;margin-top:48px"><a class="btn btn-dark" href="services.php">View all services {ic("arrow")}</a></div>\n</div></section>')
 
 def training_teaser():
     names = ["Front End Development", "Cloud Computing", "Cyber Security", "DevOps Engineering", "Product Design"]
     chips = "".join(f'<a class="chip-lg" href="training.php">{n}</a>' for n in names)
     return f'''<section class="section"><div class="container"><div class="tease reveal">
-  <div><span class="eyebrow">Empre Training</span><h2>Build in-demand tech skills with hands-on training</h2>
-  <p>Virtual or in-person capacity-building programmes taught by practitioners. Pick a course, read the details and enrol online in minutes.</p>
+  <div><span class="eyebrow">Technology Training &amp; Development</span><h2>Practical learning for career-ready skills</h2>
+  <p>Hands-on programmes designed to build confidence and capability, delivered virtually or in person. Corporate training and team upskilling can be scoped to your organisation's needs.</p>
   <div class="chips-lg" id="tease-courses">{chips}</div>
   <a class="btn btn-primary" href="training.php">Explore courses &amp; enrol {ic("arrow")}</a></div>
   <div class="tease-art" aria-hidden="true"><span>{ic("grad")}</span></div>
 </div></div></section>
 <script>fetch('api-courses.php').then(function(r){{return r.json()}}).then(function(j){{if(!j.length)return;document.getElementById('tease-courses').innerHTML=j.map(function(c){{var a=document.createElement('a');a.className='chip-lg';a.href='course.php?c='+encodeURIComponent(c.slug);a.textContent=c.title;return a.outerHTML}}).join('')}}).catch(function(){{}});</script>'''
 
-def why():
-    p = [("bulb", "Innovation", "We keep pace with modern technologies and bring practical, forward-looking ideas to every project."),
-         ("target", "Excellence", "Careful work, clear communication and high standards from the first call to the final hand-over."),
-         ("handshake", "Real business outcomes", "A client-first approach focused on results you can measure, not just tasks completed.")]
-    cards = "".join(f'<div class="pillar reveal d{i+1}"><div class="ico">{ic(a)}</div><h3>{b}</h3><p>{c}</p></div>' for i, (a, b, c) in enumerate(p))
-    return f'''<section class="section dark"><div class="container">
-  <div class="sec-head center reveal"><span class="eyebrow">Why Empre</span><h2>Technical expertise with a client-first approach</h2>
-  <p>We combine technical expertise with a client-first approach, focusing on innovation, excellence, and real business outcomes.</p></div>
-  <div class="pillars">{cards}</div>
-  <p class="why-tag reveal">Whether you're a startup or a growing enterprise, <em>Empre is your IT partner</em> for the journey ahead.</p>
+def customers(soft=True):
+    c = [("users", "Small & medium-sized businesses", "Practical IT support, Microsoft 365, device security, websites and business systems."),
+         ("server", "Enterprise & growing teams", "Modern workplace deployment, endpoint management, identity security and technical support."),
+         ("bulb", "Startups & entrepreneurs", "Brand identity, product design, web development and digital foundations."),
+         ("grad", "Individuals & organisations", "Professional training, technology upskilling and tailored learning programmes.")]
+    cards = "".join(f'<div class="card reveal d{i%4}"><div class="ico">{ic(a)}</div><h3>{b}</h3><p>{d}</p></div>' for i, (a, b, d) in enumerate(c))
+    return f'''<section class="section{" soft" if soft else ""}"><div class="container">
+  <div class="sec-head center reveal"><span class="eyebrow">Our Customers</span><h2>Who we work with</h2>
+  <p>Flexible engagement for different business stages, team sizes and technology needs.</p></div>
+  <div class="cards-4">{cards}</div>
 </div></section>'''
 
-# ------------------------------------------------------------------ pages
+def why():
+    p = [("users", "Client-first", "We start by understanding the business need and the people affected."),
+         ("wrench", "Practical expertise", "We focus on useful solutions that can be implemented and supported."),
+         ("layers", "Connected capabilities", "IT, security, digital delivery and training under one partner."),
+         ("refresh", "Continuous improvement", "We value learning, documentation and sustainable outcomes.")]
+    cards = "".join(f'<div class="pillar reveal d{i%4}"><div class="ico">{ic(a)}</div><h3>{b}</h3><p>{c}</p></div>' for i, (a, b, c) in enumerate(p))
+    return f'''<section class="section dark"><div class="container">
+  <div class="sec-head center reveal"><span class="eyebrow">Why Empre</span><h2>A partner focused on practical outcomes</h2>
+  <p>We combine technical capability with a client-first approach.</p></div>
+  <div class="pillars four">{cards}</div>
+  <p class="why-tag reveal"><em>Innovation. Excellence. Integrity. Client Success.</em><br>We look forward to helping you build, secure and grow.</p>
+</div></section>'''
+
+def values():
+    v = [("bulb", "Innovation", "Embracing modern technologies to solve real problems."),
+         ("target", "Excellence", "High standards in every project and every support call."),
+         ("lock", "Integrity", "Honest advice, with scope, deliverables and fees agreed before work begins."),
+         ("handshake", "Client Success", "We measure our work by the progress our clients make.")]
+    cards = "".join(f'<div class="card reveal d{i%4}"><div class="ico">{ic(a)}</div><h3>{b}</h3><p>{c}</p></div>' for i, (a, b, c) in enumerate(v))
+    return f'''<section class="section"><div class="container">
+  <div class="sec-head center reveal"><span class="eyebrow">What Drives Us</span><h2>Our values</h2><p>The principles behind everything we deliver.</p></div>
+  <div class="cards-4">{cards}</div></div></section>'''
+
+def process(soft=False):
+    st = [("Discover", "Understand goals, current environment and constraints."), ("Recommend", "Agree scope, approach, deliverables and timeline."),
+          ("Implement", "Deliver the solution with clear communication."), ("Enable", "Document, hand over and equip users or teams."),
+          ("Support", "Provide agreed follow-up, optimisation or ongoing support.")]
+    items = "".join(f'<li class="step reveal d{i%4}"><span class="n">{i+1:02d}</span><h3>{a}</h3><p>{b}</p></li>' for i, (a, b) in enumerate(st))
+    return f'''<section class="section{" soft" if soft else ""}"><div class="container">
+  <div class="sec-head center reveal"><span class="eyebrow">Working With Us</span><h2>A straightforward path from need to outcome</h2>
+  <p>A consistent engagement approach for projects, support and training.</p></div>
+  <ol class="steps">{items}</ol>
+  <p class="lead-note reveal">Every engagement is scoped to the client's requirements. Specific deliverables, service levels, timelines and fees are agreed before work begins.</p>
+</div></section>'''
+
+# ------------------------------------------------------------------ pages (PHP, so services can come from the database)
+def php_page(title, desc, active, body):
+    return ("<?php\nrequire __DIR__ . '/lib/bootstrap.php';\n"
+            f"$title = {phpq(title)};\n$desc = {phpq(desc)};\n$active = {phpq(active)};\n"
+            "include __DIR__ . '/inc/head.php';\n?>\n" + body + "\n<?php include __DIR__ . '/inc/foot.php'; ?>\n")
+
 def page_home():
     slides = [
-      ("1", "Welcome to Empre Technologies", "Smart IT solutions for <em>modern</em> businesses",
-       "Scalable, secure and intelligent technology services that help your company run smoother and grow faster.", "Explore Services", "services.html"),
-      ("2", "Microsoft 365", "Collaborate better with <em>Microsoft 365</em>",
-       "Exchange Online, SharePoint, OneDrive, Teams and Entra ID: assessed, set up, migrated and taught.", "See How We Help", "services.html#microsoft-365"),
-      ("3", "Endpoint Management &amp; Security", "Secure every device, <em>every day</em>",
-       "Policy enforcement, real-time threat detection and reporting with Intune, Defender for Endpoint and ZOHO Endpoint Central.", "Protect Your Business", "services.html#endpoint-security"),
-      ("4", "Design &amp; Development", "Websites and apps that make your <em>brand</em> shine",
-       "Website design, web and application development, product design and branding from one creative team.", "Start a Project", "contact.html"),
-      ("5", "Training", "Build a team that <em>thrives</em> with technology",
-       "Virtual or in-person capacity-building: admin tasks, security awareness and certification tracks.", "Train Your Team", "training.php"),
+      ("1", "Empre Technologies", "Technology that <em>empowers</em> businesses to grow.",
+       "IT infrastructure, cloud, cybersecurity, software, digital design and professional training, from one trusted partner.", "Explore Services", "services.php"),
+      ("2", "Enable", "Build reliable <em>digital</em> foundations",
+       "Technical support, Microsoft 365, identity and access, and cloud infrastructure that keep your people productive.", "IT, Cloud &amp; Cybersecurity", "services.php#it-cloud-cybersecurity"),
+      ("3", "Protect", "Secure systems, devices and <em>data</em>",
+       "Endpoint management with Intune, Defender for Endpoint and Zoho Endpoint Central, with monitoring and compliance built in.", "Protect Your Business", "services.php#endpoint-management-security"),
+      ("4", "Empower · Products", "Digital products and brands that <em>grow</em> with you",
+       "Websites, web applications, product design and branding that support customer engagement and business growth.", "Software &amp; Digital Solutions", "services.php#software-digital-solutions"),
+      ("5", "Empower · People", "Build skills that <em>power</em> careers and teams",
+       "Practical, career-ready training in front-end, cloud, cybersecurity, DevOps and product design, virtual or in person.", "Explore Training", "training.php"),
     ]
     sl = "".join(f'''<div class="slide{" is-active" if n=="1" else ""}" aria-roledescription="slide">
       <div class="slide-bg" style="background-image:url(assets/img/hero-{n}.svg)"></div>
       <div class="container"><div class="slide-content anim">
         <span class="eyebrow">{eb}</span><h1>{h}</h1><p class="lead">{p}</p>
-        <div class="slide-actions"><a class="btn btn-primary" href="{href}">{cta_t} {ic("arrow")}</a><a class="btn btn-outline" href="contact.html">Contact Us</a></div>
+        <div class="slide-actions"><a class="btn btn-primary" href="{href}">{cta_t} {ic("arrow")}</a><a class="btn btn-outline" href="contact.php">Contact Us</a></div>
       </div></div></div>''' for n, eb, h, p, cta_t, href in slides)
     dots = "".join(f'<button aria-label="Go to slide {i+1}"></button>' for i in range(len(slides)))
-    strip = [("headset", "Technical Support", "Remote &amp; on-site"), ("cloud", "Microsoft 365", "Deployment &amp; migration"),
-             ("shield", "Endpoint Security", "Intune · Defender · ZOHO"), ("grad", "Training", "Virtual or in-person")]
-    st = "".join(f'<div class="strip-item"><span class="ico">{ic(i)}</span><div><b>{t}</b><span>{s}</span></div></div>' for i, t, s in strip)
-    body = head("Empre Technologies Ltd | IT Solutions, Microsoft 365, Security & Digital Design",
-                "Empre Technologies delivers scalable, secure and intelligent IT services: technical support, Microsoft 365, endpoint security, training, web development and branding.", "home") + header("index.html")
-    body += f'''<section class="hero" aria-roledescription="carousel" aria-label="Featured">
+    strip = ('<?php foreach (array_slice(site_areas(), 0, 4) as $__a): ?><a class="strip-item" href="services.php#<?= e($__a[\'slug\']) ?>"><span class="ico">' + icp("$__a") +
+             '</span><div><b><?= e($__a[\'title\']) ?></b><span><?= count($__a[\'services\']) ?> service<?= count($__a[\'services\']) === 1 ? "" : "s" ?></span></div></a><?php endforeach; ?>')
+    body = f'''<section class="hero" aria-roledescription="carousel" aria-label="Featured">
   <div class="slides">{sl}</div>
   <div class="hero-ctrl"><div class="container"><div class="dots">{dots}</div>
     <div class="arrows"><button class="prev" aria-label="Previous slide">{ic("arrow")}</button><button class="next" aria-label="Next slide">{ic("arrow")}</button></div></div></div>
 </section>
-<div class="strip"><div class="container"><div class="strip-grid">{st}</div></div></div>
+<div class="strip"><div class="container"><div class="strip-grid">{strip}</div></div></div>
 '''
-    body += who_we_are_split() + what_we_do() + services_grid() + training_teaser() + why() + cta() + footer()
-    return body
+    body += who_we_are_split() + positioning(True) + what_we_do(False) + services_grid(True) + training_teaser() + why() + cta()
+    return php_page("Empre Technologies Ltd | Technology that empowers businesses to grow",
+                    "Empre Technologies helps businesses transform their operations through IT infrastructure, cloud, cybersecurity, software development, digital design and professional technology training.", "index.php", body)
 
 def page_about():
-    vals = [("bulb", "Innovation", "Embracing modern technologies to solve real problems."),
-            ("target", "Excellence", "High standards in every project and every support call."),
-            ("users", "Client-first", "Your goals guide every recommendation we make."),
-            ("handshake", "Real outcomes", "We measure success by the impact on your business.")]
-    v = "".join(f'<div class="card reveal d{i%4}"><div class="ico">{ic(a)}</div><h3>{b}</h3><p>{c}</p></div>' for i, (a, b, c) in enumerate(vals))
-    body = head("About Us | Empre Technologies Ltd", "Learn about Empre Technologies, a forward-thinking IT solutions company delivering scalable, secure and intelligent technology services.", "about") + header("about.html")
-    body += banner("About Us", "About Us", "A forward-thinking IT solutions company helping businesses run smoother and grow faster.")
-    body += who_we_are_split(button=False)
-    body += f'''<section class="section soft"><div class="container">
-  <div class="sec-head center reveal"><span class="eyebrow">What Drives Us</span><h2>Our values</h2><p>The principles behind everything we deliver.</p></div>
-  <div class="cards-4">{v}</div></div></section>'''
-    body += what_we_do().replace('section soft', 'section') + why() + cta() + footer()
-    return body
-
-def enq(s):
-    if s["id"] == "training":
-        return f'<a class="btn btn-primary" style="margin-top:14px" href="training.php">View courses &amp; enrol {ic("arrow")}</a>'
-    return f'<a class="btn btn-primary" style="margin-top:14px" href="contact.html?service={s["id"]}">Enquire about this {ic("arrow")}</a>'
+    body = banner("About Us", "About Us", f"{TAGLINE} A technology partner for organisations and individuals navigating a digital world.")
+    body += who_we_are_split(button=False) + positioning(True) + values() + customers(True) + why() + process(False) + cta()
+    return php_page("About Us | Empre Technologies Ltd", "Empre Technologies is a technology solutions company delivering scalable, secure and practical IT, cloud, cybersecurity, software and training services.", "about.php", body)
 
 def page_services():
-    blocks = ""
-    for i, s in enumerate(SERVICES):
-        pts = "".join(f'<li><span class="tick">{ic("check")}</span><span>{p}</span></li>' for p in s["points"])
-        blocks += f'''<article class="svc" id="{s["id"]}">
-  <div class="svc-art reveal"><span class="tag">{"0"+str(i+1)} · {"DESIGN &amp; DEVELOPMENT" if s["new"] else "IT SERVICES"}</span><div class="big">{ic(s["icon"])}</div></div>
-  <div class="reveal d1"><span class="eyebrow">Service 0{i+1}</span><h2>{s["title"]}</h2><p>{s["long"]}</p>
-    <ul class="checks">{pts}</ul>
-    {enq(s)}</div>
-</article>'''
-    body = head("Our Services | Empre Technologies Ltd", "IT support, Microsoft 365, endpoint security, training, website design, web & app development, product design and branding.", "services") + header("services.html")
-    body += banner("Our Services", "Our Services", "IT support, cloud and security, training, and digital design and development, all from one team.")
-    body += f'''<section class="section" style="padding-bottom:40px"><div class="container">
-  <div class="sec-head center reveal" style="margin-bottom:0"><span class="eyebrow">What we offer</span><h2>Eight services, one trusted partner</h2>
-  <p>From keeping your systems running to building the websites, apps and brand your customers see.</p></div></div></section>
-<section style="padding-bottom:70px"><div class="container">{blocks}</div></section>'''
-    body += cta("Not sure which service you need?", "Tell us about your business and we'll recommend the right solution.") + footer()
-    return body
+    tick = ic("check")
+    art = ('<div class="svc-art reveal"><span class="tag">SERVICE AREA <?= sprintf(\'%02d\', $__ai + 1) ?></span><div class="big">' + icp("$s") + '</div></div>')
+    svc = ('<?php $__n++; $__cta = trim((string)$s[\'cta_url\']) !== \'\' ? $s[\'cta_url\'] : \'contact.php?service=\' . rawurlencode($s[\'slug\']);\n'
+           '$__lbl = trim((string)$s[\'cta_label\']) !== \'\' ? $s[\'cta_label\'] : \'Enquire about this\'; ?>\n'
+           '<article class="svc<?= $__n % 2 === 0 ? \' flip\' : \'\' ?>" id="<?= e($s[\'slug\']) ?>">\n  ' + art + '\n'
+           '  <div class="reveal d1"><span class="eyebrow">Service <?= sprintf(\'%02d\', $__n) ?></span><h2><?= e($s[\'title\']) ?></h2>\n'
+           '    <?php foreach (svc_paras($s[\'description\'] ?: $s[\'short\']) as $__p): ?><p><?= e($__p) ?></p><?php endforeach; ?>\n'
+           f'    <ul class="checks"><?php foreach (svc_lines($s[\'points\']) as $__pt): ?><li><span class="tick">{tick}</span><span><?= e($__pt) ?></span></li><?php endforeach; ?></ul>\n'
+           f'    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"><?= e($__lbl) ?> {ic("arrow")}</a></div>\n</article>\n')
+    area = ('<section class="area" id="<?= e($a[\'slug\']) ?>"><div class="container">\n'
+            '  <div class="area-head reveal"><span class="eyebrow">Service area <?= sprintf(\'%02d\', $__ai + 1) ?></span><h2><?= e($a[\'title\']) ?></h2><p><?= e($a[\'tagline\']) ?></p></div>\n'
+            '  <?php foreach ($a[\'services\'] as $s): ?>' + svc + '  <?php endforeach; ?>\n'
+            f'  <?php if (trim((string)$a[\'outcome\']) !== \'\'): ?><div class="outcome reveal">{ic("target")}<p><b>Outcome:</b> <?= e($a[\'outcome\']) ?></p></div><?php endif; ?>\n'
+            '</div></section>\n')
+    body = banner("Our Services", "Our Services", "Four connected service areas designed to support the full technology journey.")
+    body += ('<?php $__areas = site_areas(); $__n = 0; ?>\n'
+             '<section class="section" style="padding-bottom:20px"><div class="container">\n'
+             '  <div class="sec-head center reveal" style="margin-bottom:0"><span class="eyebrow">What we offer</span><h2>Integrated technology services</h2>\n'
+             '  <p>From keeping your systems running and secure to building the products, brand and skills that help you grow. Service scope can be tailored to project requirements, business size and operational needs.</p></div></div></section>\n'
+             '<?php foreach ($__areas as $__ai => $a): ?>\n' + area + '<?php endforeach; ?>\n'
+             '<?php if (!$__areas): ?><section class="section"><div class="container"><p style="text-align:center">Our service list is being updated. Please <a href="contact.php" style="color:var(--brand);font-weight:700">contact us</a> to talk about your needs.</p></div></section><?php endif; ?>\n')
+    body += process(True) + cta("Not sure which service you need?", "Tell us about your business and we'll recommend the right solution.")
+    return php_page("Our Services | Empre Technologies Ltd", "IT, cloud and cybersecurity, software and digital solutions, technology training and consulting from Empre Technologies.", "services.php", body)
 
 def page_contact():
-    opts = '<option value="">Select a service (optional)</option>' + "".join(f'<option value="{s["title"]}" data-id="{s["id"]}">{s["title"]}</option>' for s in SERVICES) + '<option value="Other">Other / Not sure</option>'
+    opts = ('<option value="">Select a service (optional)</option><?php foreach (site_services() as $__s): ?><option value="<?= e($__s[\'title\']) ?>" data-id="<?= e($__s[\'slug\']) ?>"><?= e($__s[\'title\']) ?></option><?php endforeach; ?>'
+            '<option value="Other">Other / Not sure</option>')
     info = [("mail", "Email", EMAIL, f"mailto:{EMAIL}"), ("phone", "Phone", PHONE_DISPLAY, f"tel:{PHONE_TEL}"),
             ("globe", "Website", WEBSITE, f"https://{WEBSITE}"), ("instagram", "Instagram", INSTAGRAM_HANDLE, INSTAGRAM_URL)]
     il = "".join(f'<a class="info" href="{h}"><span class="ico">{ic(i)}</span><div><small>{l}</small><b>{v}</b></div></a>' for i, l, v, h in info)
-    body = head("Contact Us | Empre Technologies Ltd", "Get in touch with Empre Technologies for IT support, Microsoft 365, security, training, web development and branding.", "contact") + header("contact.html")
-    body += banner("Contact Us", "Contact", "Have a question or a project in mind? We'd love to hear from you.")
+    body = banner("Contact Us", "Contact", "Make technology work for your business. Talk to us about your next project, support requirement or training need.")
     body += f'''<section class="section"><div class="container contact-grid">
   <div class="reveal"><span class="eyebrow">Get in touch</span><h2 style="font-size:clamp(30px,3.8vw,44px);margin-top:14px">Let's talk about your business</h2>
-    <p>Send us a message and a member of the Empre team will respond as soon as possible. You can also reach us directly using the details below.</p>
+    <p>Tell us about your next project, support requirement or training need. A member of the Empre team will respond as soon as possible. You can also reach us directly using the details below.</p>
     <div class="info-list">{il}</div></div>
   <div class="form-card reveal d1">
     <h3>Send us a message</h3><p>Fields marked * are required.</p>
@@ -366,8 +389,7 @@ def page_contact():
 (function(){{var m=location.search.match(/service=([\\w-]+)/);if(!m)return;var o=document.querySelector('#service option[data-id="'+m[1]+'"]');if(o)o.parentNode.value=o.value;}})();
 </script>
 '''
-    body += footer()
-    return body
+    return php_page("Contact Us | Empre Technologies Ltd", "Talk to Empre Technologies about your next project, support requirement or training need.", "contact.php", body)
 
 
 # ------------------------------------------------------------------ hero art
@@ -436,18 +458,23 @@ def hero_svg(n):
     s.append('</svg>')
     return "".join(s)
 
+
 # ------------------------------------------------------------------ php partials
 def write_partials():
-    h = head("__T__", "__D__", "") + header(None, php=True)
+    h = head("__T__", "__D__", "") + header()
     h = h.replace("__T__", "<?= e($title) ?>").replace("__D__", "<?= e($desc) ?>")
     open(os.path.join(ROOT, "inc/head.php"), "w", encoding="utf-8").write(h)
     open(os.path.join(ROOT, "inc/foot.php"), "w", encoding="utf-8").write(footer())
 write_partials()
 
 # ------------------------------------------------------------------ write
-pages = {"index.html": page_home, "about.html": page_about, "services.html": page_services, "contact.html": page_contact}
+pages = {"index.php": page_home, "about.php": page_about, "services.php": page_services, "contact.php": page_contact}
 for fn, f in pages.items():
     open(os.path.join(ROOT, fn), "w", encoding="utf-8").write(f())
+# the old static pages are replaced by the PHP ones above (old .html addresses redirect via .htaccess)
+for old in ("index.html", "about.html", "services.html", "contact.html"):
+    p = os.path.join(ROOT, old)
+    if os.path.exists(p): os.remove(p)
 for n in range(1, 6):
     open(os.path.join(ROOT, f"assets/img/hero-{n}.svg"), "w", encoding="utf-8").write(hero_svg(n))
-print("built", list(pages), "+ 5 hero images")
+print("built", list(pages), "+ inc/head.php, inc/foot.php + 5 hero images")

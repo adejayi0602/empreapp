@@ -24,7 +24,7 @@ const ROLE_PERMS = [
 ];
 /* Permissions only the Super Admin has (via '*'):
  *   contacts.delete · students.delete · courses.delete · billing.delete (delete invoice/payment)
- *   settings.manage · staff.manage · tasks.assign */
+ *   settings.manage · staff.manage · tasks.assign · services.manage (add/edit/hide/delete website services) */
 
 /** The signed-in staff member, re-read from the database on every request so
  *  role changes and suspensions take effect immediately. */
@@ -90,6 +90,7 @@ function admin_head(string $title, string $active = ''): void {
     elseif (can('students.create')) $nav['studentnew'] = ['student-new.php', 'Add student', 0];
     if (can('courses.view'))  $nav['courses']   = ['courses.php', 'Courses', 0];
     $nav['tasks'] = ['tasks.php', can('tasks.viewall') ? 'Tasks' : 'My tasks', $myOpen];
+    if (can('services.manage')) $nav['services'] = ['services.php', 'Services', 0];
     if (can('staff.manage'))  $nav['staff']     = ['staff.php', 'Staff & access', 0];
     $nav['settings'] = ['settings.php', can('settings.manage') ? 'Settings' : 'My account', 0];
     header('X-Robots-Tag: noindex, nofollow');
@@ -102,7 +103,7 @@ function admin_head(string $title, string $active = ''): void {
     foreach ($nav as $k => [$href, $label, $n]) {
         echo '<a href="' . $href . '" class="' . ($active === $k ? 'on' : '') . '">' . e($label) . ($n ? '<i>' . $n . '</i>' : '') . '</a>';
     }
-    echo '</nav><div class="side-foot"><a href="../index.html" target="_blank">View website ↗</a><a href="logout.php">Sign out</a>' .
+    echo '</nav><div class="side-foot"><a href="../index.php" target="_blank">View website ↗</a><a href="logout.php">Sign out</a>' .
          ($u ? '<small><b style="color:#fff">' . e($u['name']) . '</b><br>' . e(($u['title'] ? $u['title'] . ' · ' : '') . role_label($u['role'])) . '</small>' : '') . '</div></aside>
 <div class="main"><header class="top"><button class="burger" onclick="document.getElementById(\'side\').classList.toggle(\'open\')" aria-label="Menu">☰</button><h1>' . e($title) . '</h1></header><div class="content">';
     foreach ($_SESSION['flash'] ?? [] as [$type, $msg]) echo '<div class="flash ' . e($type) . '">' . e($msg) . '</div>';

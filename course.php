@@ -13,7 +13,7 @@ include __DIR__ . '/inc/head.php';
 $ic = fn($n) => '<svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-' . e($n) . '"/></svg>';
 ?>
 <section class="banner"><div class="container">
-  <div class="crumbs"><a href="index.html">Home</a><span>/</span><a href="training.php">Training</a><span>/</span><span class="cur"><?= e($c['title']) ?></span></div>
+  <div class="crumbs"><a href="index.php">Home</a><span>/</span><a href="training.php">Training</a><span>/</span><span class="cur"><?= e($c['title']) ?></span></div>
   <h1><?= e($c['title']) ?></h1><p><?= e($c['summary']) ?></p>
 </div></section>
 
@@ -44,7 +44,7 @@ $ic = fn($n) => '<svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use hre
       <div><dt>Payment</dt><dd>Full or installments</dd></div>
     </dl>
     <a class="btn btn-primary" href="enroll.php?c=<?= e($c['slug']) ?>">Enrol now <?= $ic('arrow') ?></a>
-    <p class="help">Questions? <a href="contact.html">Talk to us</a></p>
+    <p class="help">Questions? <a href="contact.php">Talk to us</a></p>
   </aside>
 </div></section>
 

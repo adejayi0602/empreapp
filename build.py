@@ -84,7 +84,7 @@ def head(title, desc, page):
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=3">
+<link rel="stylesheet" href="assets/css/style.css?v=4">
 </head>
 <body>
 {SPRITE}
@@ -158,6 +158,8 @@ def footer():
 </footer>
 <button class="to-top" aria-label="Back to top">{ic("arrow")}</button>
 <script src="assets/js/main.js"></script>
+<!-- Conversa AI chat widget: sits at the bottom-right of every public page (the back-to-top button is lifted above it in style.css) -->
+<script src="https://conversaai.com.ng/widget.js" data-key="pk_c534d3ea0bb85253d069" async></script>
 </body>
 </html>
 '''

@@ -28,5 +28,7 @@
 </footer>
 <button class="to-top" aria-label="Back to top"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></button>
 <script src="assets/js/main.js"></script>
+<!-- Conversa AI chat widget: sits at the bottom-right of every public page (the back-to-top button is lifted above it in style.css) -->
+<script src="https://conversaai.com.ng/widget.js" data-key="pk_c534d3ea0bb85253d069" async></script>
 </body>
 </html>

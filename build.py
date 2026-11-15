@@ -63,6 +63,8 @@ DESCRIPTOR = "IT • Cloud • Cybersecurity • Digital Solutions • Training"
 VALUES_LINE = "Innovation • Excellence • Integrity • Client Success"
 NAV = [("index.php", "Home"), ("about.php", "About Us"), ("services.php", "Our Services"), ("training.php", "Training"), ("contact.php", "Contact")]
 
+CONVERSA_PHP = "<?= e(function_exists('conversa_url') ? conversa_url() : 'https://conversaai.com.ng/') ?>"
+
 def phpq(s):
     return "'" + s.replace("\\", "\\\\").replace("'", "\\'") + "'"
 
@@ -84,7 +86,7 @@ def head(title, desc, page):
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=4">
+<link rel="stylesheet" href="assets/css/style.css?v=6">
 </head>
 <body>
 {SPRITE}
@@ -101,7 +103,9 @@ def social_links():
     return "".join(f'<a href="{u}" aria-label="{n}" target="_blank" rel="noopener">{ic(k)}</a>' for k, n, u in SOCIAL)
 
 def header(active=None, php=False):
-    links = "".join(f'<li><a class="link<?= ($active ?? "")==="{h}" ? " active" : "" ?>" href="{h}">{t}</a></li>' for h, t in NAV)
+    items = [f'<li><a class="link<?= ($active ?? "")==="{h}" ? " active" : "" ?>" href="{h}">{t}</a></li>' for h, t in NAV]
+    items.insert(len(items) - 1, f'<li><a class="link nav-conversa" href="{CONVERSA_PHP}" target="_blank" rel="noopener">Conversa AI<span class="pill">New</span></a></li>')
+    links = "".join(items)
     return f'''<div class="topbar"><div class="container">
   <ul>
     <li><a href="mailto:{EMAIL}">{ic("mail")}{EMAIL}</a></li>
@@ -129,6 +133,7 @@ def header(active=None, php=False):
 
 def footer():
     q = "".join(f'<li><a href="{h}">{ic("arrow")}{t}</a></li>' for h, t in NAV)
+    q += f'<li><a href="{CONVERSA_PHP}" target="_blank" rel="noopener">{ic("arrow")}Conversa AI (sign up)</a></li>'
     svc = ('<?php $__fs = function_exists("site_services") ? site_services() : []; foreach ($__fs as $__s): ?>'
            f'<li><a href="services.php#<?= e($__s[\'slug\']) ?>">{ic("arrow")}<?= e($__s[\'title\']) ?></a></li><?php endforeach; ?>')
     return f'''</main>
@@ -230,6 +235,14 @@ def services_grid(soft=True):
             '  <div class="cards-3"><?php foreach ($__svcs as $__i => $s): ?>' + card + '<?php endforeach; ?></div>\n'
             f'  <div style="text-align:center;margin-top:48px"><a class="btn btn-dark" href="services.php">View all services {ic("arrow")}</a></div>\n</div></section>')
 
+def conversa_band():
+    return f'''<section class="section soft"><div class="container"><div class="conversa reveal">
+  <div class="c-txt"><span class="eyebrow">New from Empre Technologies</span><h2>Conversa AI: customer conversations that convert</h2>
+  <p>Our AI assistant answers customer questions on WhatsApp and your website, qualifies leads and hands over to your team when needed. Sign up online and add it to your site with a single line of code.</p>
+  <div class="c-actions"><a class="btn btn-primary" href="{CONVERSA_PHP}" target="_blank" rel="noopener">Sign up on Conversa AI {ic("arrow")}</a><a class="btn btn-dark" href="services.php#conversa-ai">Learn more</a></div></div>
+  <div class="c-art" aria-hidden="true"><span>{ic("headset")}</span></div>
+</div></div></section>'''
+
 def training_teaser():
     names = ["Front End Development", "Cloud Computing", "Cyber Security", "DevOps Engineering", "Product Design"]
     chips = "".join(f'<a class="chip-lg" href="training.php">{n}</a>' for n in names)
@@ -324,7 +337,7 @@ def page_home():
 </section>
 <div class="strip"><div class="container"><div class="strip-grid">{strip}</div></div></div>
 '''
-    body += who_we_are_split() + positioning(True) + what_we_do(False) + services_grid(True) + training_teaser() + why() + cta()
+    body += who_we_are_split() + positioning(True) + what_we_do(False) + services_grid(True) + conversa_band() + training_teaser() + why() + cta()
     return php_page("Empre Technologies Ltd | Technology that empowers businesses to grow",
                     "Empre Technologies helps businesses transform their operations through IT infrastructure, cloud, cybersecurity, software development, digital design and professional technology training.", "index.php", body)
 
@@ -336,13 +349,13 @@ def page_about():
 def page_services():
     tick = ic("check")
     art = ('<div class="svc-art reveal"><span class="tag">SERVICE AREA <?= sprintf(\'%02d\', $__ai + 1) ?></span><div class="big">' + icp("$s") + '</div></div>')
-    svc = ('<?php $__n++; $__cta = trim((string)$s[\'cta_url\']) !== \'\' ? $s[\'cta_url\'] : \'contact.php?service=\' . rawurlencode($s[\'slug\']);\n'
+    svc = ('<?php $__n++; $__cta = trim((string)$s[\'cta_url\']) !== \'\' ? svc_link(trim($s[\'cta_url\'])) : \'contact.php?service=\' . rawurlencode($s[\'slug\']);\n'
            '$__lbl = trim((string)$s[\'cta_label\']) !== \'\' ? $s[\'cta_label\'] : \'Enquire about this\'; ?>\n'
            '<article class="svc<?= $__n % 2 === 0 ? \' flip\' : \'\' ?>" id="<?= e($s[\'slug\']) ?>">\n  ' + art + '\n'
            '  <div class="reveal d1"><span class="eyebrow">Service <?= sprintf(\'%02d\', $__n) ?></span><h2><?= e($s[\'title\']) ?></h2>\n'
            '    <?php foreach (svc_paras($s[\'description\'] ?: $s[\'short\']) as $__p): ?><p><?= e($__p) ?></p><?php endforeach; ?>\n'
            f'    <ul class="checks"><?php foreach (svc_lines($s[\'points\']) as $__pt): ?><li><span class="tick">{tick}</span><span><?= e($__pt) ?></span></li><?php endforeach; ?></ul>\n'
-           f'    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"><?= e($__lbl) ?> {ic("arrow")}</a></div>\n</article>\n')
+           f'    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"<?= preg_match(\'~^https?://~i\', $__cta) ? \' target="_blank" rel="noopener"\' : \'\' ?>><?= e($__lbl) ?> {ic("arrow")}</a></div>\n</article>\n')
     area = ('<section class="area" id="<?= e($a[\'slug\']) ?>"><div class="container">\n'
             '  <div class="area-head reveal"><span class="eyebrow">Service area <?= sprintf(\'%02d\', $__ai + 1) ?></span><h2><?= e($a[\'title\']) ?></h2><p><?= e($a[\'tagline\']) ?></p></div>\n'
             '  <?php foreach ($a[\'services\'] as $s): ?>' + svc + '  <?php endforeach; ?>\n'

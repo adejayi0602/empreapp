@@ -72,7 +72,12 @@ include __DIR__ . '/inc/head.php';
   <p>IT, cloud and cybersecurity, software and digital solutions, training and consulting, from one connected partner.</p></div>
   <div class="cards-3"><?php foreach ($__svcs as $__i => $s): ?><a class="card reveal d<?= $__i % 4 ?>" href="services.php#<?= e($s['slug']) ?>"><div class="ico"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-<?= e(svc_icon($s['icon'])) ?>"/></svg></div><h3><?= e($s['title']) ?></h3><p><?= e($s['short']) ?></p><span class="more">Learn more <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></span></a><?php endforeach; ?></div>
   <div style="text-align:center;margin-top:48px"><a class="btn btn-dark" href="services.php">View all services <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a></div>
-</div></section><section class="section"><div class="container"><div class="tease reveal">
+</div></section><section class="section soft"><div class="container"><div class="conversa reveal">
+  <div class="c-txt"><span class="eyebrow">New from Empre Technologies</span><h2>Conversa AI: customer conversations that convert</h2>
+  <p>Our AI assistant answers customer questions on WhatsApp and your website, qualifies leads and hands over to your team when needed. Sign up online and add it to your site with a single line of code.</p>
+  <div class="c-actions"><a class="btn btn-primary" href="<?= e(function_exists('conversa_url') ? conversa_url() : 'https://conversaai.com.ng/') ?>" target="_blank" rel="noopener">Sign up on Conversa AI <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a><a class="btn btn-dark" href="services.php#conversa-ai">Learn more</a></div></div>
+  <div class="c-art" aria-hidden="true"><span><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-headset"/></svg></span></div>
+</div></div></section><section class="section"><div class="container"><div class="tease reveal">
   <div><span class="eyebrow">Technology Training &amp; Development</span><h2>Practical learning for career-ready skills</h2>
   <p>Hands-on programmes designed to build confidence and capability, delivered virtually or in person. Corporate training and team upskilling can be scoped to your organisation's needs.</p>
   <div class="chips-lg" id="tease-courses"><a class="chip-lg" href="training.php">Front End Development</a><a class="chip-lg" href="training.php">Cloud Computing</a><a class="chip-lg" href="training.php">Cyber Security</a><a class="chip-lg" href="training.php">DevOps Engineering</a><a class="chip-lg" href="training.php">Product Design</a></div>

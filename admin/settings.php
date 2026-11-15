@@ -7,6 +7,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     case 'company':
         require_perm('settings.manage');
         foreach (['company_name', 'company_email', 'company_phone', 'company_web', 'currency', 'bank_name', 'account_name', 'account_number'] as $k) save_setting($k, line(post($k, 150)));
+        $cu = trim(post('conversa_url', 300)); save_setting('conversa_url', preg_match('~^https?://~i', $cu) ? $cu : DEFAULT_SETTINGS['conversa_url']);
         save_setting('company_address', post('company_address', 300)); save_setting('invoice_note', post('invoice_note', 500));
         flash('Settings saved. They appear on all invoices and receipts.'); break;
     case 'profile':
@@ -32,6 +33,7 @@ admin_head($isSuper ? 'Settings' : 'My account', 'settings'); ?>
 <form method="post" class="card"><?= csrf_field() ?><input type="hidden" name="action" value="company"><h3>Company &amp; payment details (shown on invoices and receipts)</h3>
 <div class="row"><div class="f"><label>Company name</label><input name="company_name" value="<?= e($S['company_name']) ?>"></div><div class="f"><label>Currency symbol</label><input name="currency" value="<?= e($S['currency']) ?>"></div></div>
 <div class="row3 row"><div class="f"><label>Email</label><input name="company_email" value="<?= e($S['company_email']) ?>"></div><div class="f"><label>Phone</label><input name="company_phone" value="<?= e($S['company_phone']) ?>"></div><div class="f"><label>Website</label><input name="company_web" value="<?= e($S['company_web']) ?>"></div></div>
+<div class="f"><label>Conversa AI sign-up link (menu, footer and the Conversa AI service on the website)</label><input name="conversa_url" placeholder="https://conversaai.com.ng/" value="<?= e($S['conversa_url']) ?>"><small class="muted">Paste the exact sign-up/register page address from conversaai.com.ng.</small></div>
 <div class="f"><label>Address</label><textarea name="company_address" style="min-height:60px"><?= e($S['company_address']) ?></textarea></div>
 <div class="row3 row"><div class="f"><label>Bank name</label><input name="bank_name" value="<?= e($S['bank_name']) ?>"></div><div class="f"><label>Account name</label><input name="account_name" value="<?= e($S['account_name']) ?>"></div><div class="f"><label>Account number</label><input name="account_number" value="<?= e($S['account_number']) ?>"></div></div>
 <div class="f"><label>Note printed on invoices</label><textarea name="invoice_note" style="min-height:60px"><?= e($S['invoice_note']) ?></textarea></div><button class="btn">Save settings</button></form>

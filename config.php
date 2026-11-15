@@ -16,6 +16,7 @@ const DEFAULT_SETTINGS = [
     'company_email'  => 'info@empretechnologies.com.ng',
     'company_phone'  => '+234 813 964 5973',
     'company_web'    => 'empretechnologies.com.ng',
+    'conversa_url'   => 'https://conversaai.com.ng/',
     'company_address'=> '',
     'currency'       => '₦',
     'bank_name'      => '',

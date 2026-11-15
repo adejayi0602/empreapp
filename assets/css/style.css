@@ -459,3 +459,18 @@ a.strip-item{color:inherit}
 
 /* Chat widget sits bottom-right (60px launcher, 20px from the edges); the back-to-top button stays above it */
 @media (max-width:480px){.to-top{right:22px;bottom:92px;width:44px;height:44px}}
+
+/* ---------- Conversa AI (menu pill + promo band) ---------- */
+.nav a.link.nav-conversa{display:inline-flex;align-items:center;gap:8px}
+.nav a.link .pill{font-size:10.5px;font-weight:800;letter-spacing:.04em;text-transform:uppercase;background:var(--brand);color:#fff;border-radius:999px;padding:2px 8px;line-height:1.5}
+.conversa{display:grid;grid-template-columns:1.5fr .7fr;gap:48px;align-items:center;background:#fff;border:1px solid var(--line);border-radius:32px;padding:56px;box-shadow:var(--shadow);position:relative;overflow:hidden}
+.conversa::before{content:"";position:absolute;width:420px;height:420px;border-radius:50%;background:radial-gradient(circle,rgba(247,127,0,.18),transparent 65%);right:-120px;top:-140px}
+.conversa>*{position:relative}
+.conversa h2{font-size:clamp(26px,3.2vw,38px);margin:14px 0 14px}
+.conversa p{color:var(--muted);font-size:17px}
+.c-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:24px}
+.c-art{display:grid;place-items:center}
+.c-art span{width:150px;height:150px;border-radius:44px;background:var(--brand);color:#fff;display:grid;place-items:center;transform:rotate(6deg);box-shadow:0 30px 60px -20px rgba(247,127,0,.7)}
+.c-art .ic{width:74px;height:74px;stroke-width:1.5}
+@media (max-width:900px){.conversa{grid-template-columns:1fr;padding:36px 26px}.c-art{display:none}}
+@media (max-width:900px){.nav a.link.nav-conversa{display:flex;justify-content:flex-start}}

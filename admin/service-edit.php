@@ -15,7 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         flash('Service "' . $s['title'] . '" was deleted and removed from the website.'); redirect('services.php');
     }
     $cta = trim(post('cta_url', 200));
-    if ($cta !== '' && !preg_match('~^(https?://|[A-Za-z0-9_./?=&#%-]+$)~', $cta)) $cta = '';
+    if ($cta !== '' && $cta !== '@conversa' && !preg_match('~^(https?://|[A-Za-z0-9_./?=&#%-]+$)~', $cta)) $cta = '';
     if (preg_match('~^(javascript|data):~i', $cta)) $cta = '';
     $f = ['area_id' => (int)post('area_id'), 'title' => line(post('title', 120)), 'icon' => svc_icon(post('icon')), 'short' => post('short', 300), 'description' => post('description', 4000),
           'points' => post('points', 3000), 'cta_label' => line(post('cta_label', 60)), 'cta_url' => $cta, 'active' => isset($_POST['active']) ? 1 : 0, 'sort' => (int)post('sort', 5)];
@@ -47,7 +47,7 @@ admin_head($s ? 'Edit service' : 'Add service', 'services'); ?>
   <div class="f"><label>Full description (leave a blank line between paragraphs)</label><textarea name="description" style="min-height:130px"><?= e($f['description']) ?></textarea></div>
   <div class="f"><label>What's included (one item per line)</label><textarea name="points" style="min-height:150px"><?= e($f['points']) ?></textarea></div>
   <div class="row"><div class="f"><label>Button text (optional)</label><input name="cta_label" placeholder="Default: Enquire about this" value="<?= e($f['cta_label']) ?>"></div>
-  <div class="f"><label>Button link (optional)</label><input name="cta_url" placeholder="Default: our contact form. e.g. training.php" value="<?= e($f['cta_url']) ?>"></div></div>
+  <div class="f"><label>Button link (optional)</label><input name="cta_url" placeholder="Default: our contact form. e.g. training.php, or @conversa for the Conversa AI sign-up link" value="<?= e($f['cta_url']) ?>"></div></div>
   <div class="f"><label style="display:flex;gap:10px;align-items:center;font-weight:600"><input type="checkbox" name="active" style="width:auto" <?= $f['active'] ? 'checked' : '' ?>> Show this service on the website</label></div>
   <button class="btn"><?= $s ? 'Save service' : 'Add service' ?></button> <a class="btn ghost" href="services.php">Cancel</a>
 </form>

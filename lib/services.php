@@ -116,3 +116,26 @@ function seed_services(PDO $pdo): void {
     $is = $pdo->prepare("INSERT INTO services(area_id,slug,title,icon,short,description,points,cta_label,cta_url,active,sort,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,1,?,?,?)");
     foreach ($svcs as $i => $s) $is->execute([$ids[$s[0]], $s[1], $s[2], $s[3], $s[4], $s[5], $s[6], $s[7], $s[8], $i + 1, now(), now()]);
 }
+
+/** Where the "Conversa AI" menu item, footer link and service button send visitors (Admin > Settings). */
+function conversa_url(): string {
+    $u = function_exists('setting') ? trim(setting('conversa_url')) : '';
+    return preg_match('~^https?://~i', $u) ? $u : 'https://conversaai.com.ng/';
+}
+/** Resolve a service button link: "@conversa" means the Conversa AI sign-up link above. */
+function svc_link(string $u): string { return $u === '@conversa' ? conversa_url() : $u; }
+
+/** One-time: add the Conversa AI service (Nov 2026) to sites that were seeded before it existed. */
+function add_conversa_service(PDO $pdo): void {
+    if ($pdo->query("SELECT 1 FROM services WHERE slug='conversa-ai'")->fetch()) return;
+    $a = $pdo->query("SELECT id FROM service_areas WHERE slug='software-digital-solutions'")->fetch(PDO::FETCH_ASSOC)
+      ?: $pdo->query("SELECT id FROM service_areas ORDER BY sort, id LIMIT 1")->fetch(PDO::FETCH_ASSOC);
+    if (!$a) return;
+    $sort = (int)$pdo->query("SELECT COALESCE(MAX(sort),0)+1 FROM services")->fetchColumn();
+    $pdo->prepare("INSERT INTO services(area_id,slug,title,icon,short,description,points,cta_label,cta_url,active,sort,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,1,?,?,?)")->execute([
+        (int)$a['id'], 'conversa-ai', 'Conversa AI', 'headset',
+        'Our AI assistant that answers customer questions on WhatsApp and your website, qualifies leads and hands over to your team.',
+        "Conversa AI is built by Empre Technologies to turn customer conversations into customers. It answers questions on WhatsApp and on your website, qualifies leads, and hands the conversation over to your team when a person is needed.\n\nSign up online and add the chat widget to your website with a single line of code.",
+        "Answers customer questions on WhatsApp\nChat widget for your website\nQualifies leads automatically\nHands conversations over to your team when needed\nSign up online and go live with one line of code",
+        'Sign up on Conversa AI', '@conversa', $sort, now(), now()]);
+}

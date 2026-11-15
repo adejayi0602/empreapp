@@ -16,14 +16,14 @@ include __DIR__ . '/inc/head.php';
 <?php foreach ($__areas as $__ai => $a): ?>
 <section class="area" id="<?= e($a['slug']) ?>"><div class="container">
   <div class="area-head reveal"><span class="eyebrow">Service area <?= sprintf('%02d', $__ai + 1) ?></span><h2><?= e($a['title']) ?></h2><p><?= e($a['tagline']) ?></p></div>
-  <?php foreach ($a['services'] as $s): ?><?php $__n++; $__cta = trim((string)$s['cta_url']) !== '' ? $s['cta_url'] : 'contact.php?service=' . rawurlencode($s['slug']);
+  <?php foreach ($a['services'] as $s): ?><?php $__n++; $__cta = trim((string)$s['cta_url']) !== '' ? svc_link(trim($s['cta_url'])) : 'contact.php?service=' . rawurlencode($s['slug']);
 $__lbl = trim((string)$s['cta_label']) !== '' ? $s['cta_label'] : 'Enquire about this'; ?>
 <article class="svc<?= $__n % 2 === 0 ? ' flip' : '' ?>" id="<?= e($s['slug']) ?>">
   <div class="svc-art reveal"><span class="tag">SERVICE AREA <?= sprintf('%02d', $__ai + 1) ?></span><div class="big"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-<?= e(svc_icon($s['icon'])) ?>"/></svg></div></div>
   <div class="reveal d1"><span class="eyebrow">Service <?= sprintf('%02d', $__n) ?></span><h2><?= e($s['title']) ?></h2>
     <?php foreach (svc_paras($s['description'] ?: $s['short']) as $__p): ?><p><?= e($__p) ?></p><?php endforeach; ?>
     <ul class="checks"><?php foreach (svc_lines($s['points']) as $__pt): ?><li><span class="tick"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-check"/></svg></span><span><?= e($__pt) ?></span></li><?php endforeach; ?></ul>
-    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"><?= e($__lbl) ?> <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a></div>
+    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"<?= preg_match('~^https?://~i', $__cta) ? ' target="_blank" rel="noopener"' : '' ?>><?= e($__lbl) ?> <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a></div>
 </article>
   <?php endforeach; ?>
   <?php if (trim((string)$a['outcome']) !== ''): ?><div class="outcome reveal"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-target"/></svg><p><b>Outcome:</b> <?= e($a['outcome']) ?></p></div><?php endif; ?>

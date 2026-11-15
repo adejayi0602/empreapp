@@ -114,6 +114,10 @@ function migrate(PDO $pdo): void {
         if (!(int)$pdo->query("SELECT COUNT(*) FROM service_areas")->fetchColumn()) seed_services($pdo);
         $pdo->exec("INSERT OR IGNORE INTO settings(k,v) VALUES('services_seeded','1')");
     }
+    if (!$pdo->query("SELECT 1 FROM settings WHERE k='conversa_service_added'")->fetch()) {
+        add_conversa_service($pdo);
+        $pdo->exec("INSERT OR IGNORE INTO settings(k,v) VALUES('conversa_service_added','1')");
+    }
 }
 
 function seed_courses(PDO $pdo): void {

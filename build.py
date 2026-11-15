@@ -46,6 +46,12 @@ ICONS = {
  "user": '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
  "chart": '<path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 5-6"/>',
  "compass": '<circle cx="12" cy="12" r="10"/><path d="m16 8-2 6-6 2 2-6z"/>',
+ "pin": '<path d="M20 10c0 6-8 12-8 12S4 16 4 10a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/>',
+ "briefcase": '<rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>',
+ "calendar": '<rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/>',
+ "file": '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/>',
+ "upload": '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5M12 3v12"/>',
+ "share": '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 13.5 6.8 4M15.4 6.5l-6.8 4"/>',
  "server": '<rect x="2" y="3" width="20" height="8" rx="2"/><rect x="2" y="13" width="20" height="8" rx="2"/><path d="M6 7h.01M6 17h.01"/>',
 }
 def ic(name, cls="ic"):
@@ -61,7 +67,7 @@ SPRITE = '<svg width="0" height="0" style="position:absolute" aria-hidden="true"
 TAGLINE = "Technology that empowers businesses to grow."
 DESCRIPTOR = "IT • Cloud • Cybersecurity • Digital Solutions • Training"
 VALUES_LINE = "Innovation • Excellence • Integrity • Client Success"
-NAV = [("index.php", "Home"), ("about.php", "About Us"), ("services.php", "Our Services"), ("training.php", "Training"), ("contact.php", "Contact")]
+NAV = [("index.php", "Home"), ("about.php", "About Us"), ("services.php", "Our Services"), ("training.php", "Training"), ("careers.php", "Careers"), ("contact.php", "Contact")]
 
 CONVERSA_PHP = "<?= e(function_exists('conversa_url') ? conversa_url() : 'https://conversaai.com.ng/') ?>"
 
@@ -86,7 +92,7 @@ def head(title, desc, page):
 <link rel="icon" type="image/png" href="assets/img/favicon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=6">
+<link rel="stylesheet" href="assets/css/style.css?v=8">
 </head>
 <body>
 {SPRITE}

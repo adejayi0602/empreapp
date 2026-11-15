@@ -60,3 +60,12 @@ Social links: replace the "#" URLs in the SOCIAL list in `build.py`.
 1. Upload everything (keep your existing `data/` folder and `config.php` values; do not overwrite your database).
 2. Delete the old `index.html`, `about.html`, `services.html`, `contact.html` from the live site. The new `.php` pages replace them and the root `.htaccess` forwards the old addresses.
 3. Open any page once. The new services tables are created and filled automatically, then sign in as Super Admin > Services.
+
+## Careers & applicant portal
+
+**Public:** `careers.php` (open roles, search/filter), `job.php?j=slug` (full description), `apply.php?j=slug` (standard application form: name, email, phone, LinkedIn, CV upload, cover letter, optional role question, portal password).
+**Applicant portal:** `portal-login.php`, `portal.php`, `portal-app.php?id=N`. Applicants track status and the job's status. They can edit/upload more **only** after an admin chooses "More details needed" (this unlocks editing once; sending an update puts the application back to Under Review and locks it again).
+**Admin (Careers / Applications):** add, edit, publish, close/reopen and delete jobs; review applications (Accept, Reject, More details needed, Not qualified, Mark under review), add internal notes, reset an applicant's portal password, export jobs and applications to CSV (filters respected; spreadsheet-formula safe).
+**Access:** Super Admin and Level 1 (Manager) can view/manage careers; only the Super Admin can delete jobs/applications. Billing and Intake have no access.
+**Seed data:** the three Conversa AI roles are created on first run. Edit them in Admin → Careers. Set the careers notification inbox in Admin → Settings → Careers inbox.
+**Uploads:** stored in `data/uploads/` (auto-created, deny-all `.htaccess`, served only through PHP after permission checks). Limit is 5 MB or your server's `upload_max_filesize`/`post_max_size`, whichever is lower. **Keep the `data/` folder when upgrading.**

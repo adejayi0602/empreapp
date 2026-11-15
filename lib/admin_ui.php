@@ -18,13 +18,13 @@ const ROLES = [
 const ROLE_PERMS = [
     'super_admin' => ['*'],
     'manager'     => ['dashboard', 'contacts.view', 'contacts.edit', 'students.view', 'students.create', 'students.edit',
-                      'courses.view', 'courses.edit', 'billing.view', 'billing.manage', 'docs.view', 'tasks.viewall'],
+                      'courses.view', 'courses.edit', 'billing.view', 'billing.manage', 'docs.view', 'tasks.viewall', 'careers.view', 'careers.manage'],
     'billing'     => ['dashboard', 'students.view', 'billing.view', 'billing.manage', 'docs.view'],
     'intake'      => ['students.create'],
 ];
 /* Permissions only the Super Admin has (via '*'):
  *   contacts.delete · students.delete · courses.delete · billing.delete (delete invoice/payment)
- *   settings.manage · staff.manage · tasks.assign · services.manage (add/edit/hide/delete website services) */
+ *   careers.delete (delete jobs and applications) · settings.manage · staff.manage · tasks.assign · services.manage (add/edit/hide/delete website services) */
 
 /** The signed-in staff member, re-read from the database on every request so
  *  role changes and suspensions take effect immediately. */
@@ -90,6 +90,7 @@ function admin_head(string $title, string $active = ''): void {
     elseif (can('students.create')) $nav['studentnew'] = ['student-new.php', 'Add student', 0];
     if (can('courses.view'))  $nav['courses']   = ['courses.php', 'Courses', 0];
     $nav['tasks'] = ['tasks.php', can('tasks.viewall') ? 'Tasks' : 'My tasks', $myOpen];
+    if (can('careers.view')) { $nav['jobs'] = ['jobs.php', 'Careers', 0]; $nav['applications'] = ['applications.php', 'Applications', (int)qv("SELECT COUNT(*) FROM applications WHERE status='Received'")]; }
     if (can('services.manage')) $nav['services'] = ['services.php', 'Services', 0];
     if (can('staff.manage'))  $nav['staff']     = ['staff.php', 'Staff & access', 0];
     $nav['settings'] = ['settings.php', can('settings.manage') ? 'Settings' : 'My account', 0];

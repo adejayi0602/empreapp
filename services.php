@@ -23,7 +23,7 @@ $__lbl = trim((string)$s['cta_label']) !== '' ? $s['cta_label'] : 'Enquire about
   <div class="reveal d1"><span class="eyebrow">Service <?= sprintf('%02d', $__n) ?></span><h2><?= e($s['title']) ?></h2>
     <?php foreach (svc_paras($s['description'] ?: $s['short']) as $__p): ?><p><?= e($__p) ?></p><?php endforeach; ?>
     <ul class="checks"><?php foreach (svc_lines($s['points']) as $__pt): ?><li><span class="tick"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-check"/></svg></span><span><?= e($__pt) ?></span></li><?php endforeach; ?></ul>
-    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"<?= preg_match('~^https?://~i', $__cta) ? ' target="_blank" rel="noopener"' : '' ?>><?= e($__lbl) ?> <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a></div>
+    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"<?= preg_match('~^https?://~i', $__cta) ? ' target="_blank" rel="noopener"' : '' ?>><?= e($__lbl) ?> <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a> <a class="btn btn-outline-dark" style="margin-top:14px" href="service.php?s=<?= e($s['slug']) ?>">Details</a></div>
 </article>
   <?php endforeach; ?>
   <?php if (trim((string)$a['outcome']) !== ''): ?><div class="outcome reveal"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-target"/></svg><p><b>Outcome:</b> <?= e($a['outcome']) ?></p></div><?php endif; ?>

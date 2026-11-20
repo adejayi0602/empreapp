@@ -69,3 +69,19 @@ Social links: replace the "#" URLs in the SOCIAL list in `build.py`.
 **Access:** Super Admin and Level 1 (Manager) can view/manage careers; only the Super Admin can delete jobs/applications. Billing and Intake have no access.
 **Seed data:** the three Conversa AI roles are created on first run. Edit them in Admin → Careers. Set the careers notification inbox in Admin → Settings → Careers inbox.
 **Uploads:** stored in `data/uploads/` (auto-created, deny-all `.htaccess`, served only through PHP after permission checks). Limit is 5 MB or your server's `upload_max_filesize`/`post_max_size`, whichever is lower. **Keep the `data/` folder when upgrading.**
+
+## SEO & Visibility (Admin → SEO & Visibility)
+
+One console for everything search engines, social networks and AI assistants see.
+- **Overview:** health score, site-wide checks with "Fix →" links, and a live **site audit** (loads every page and checks H1, word count, image alt text, canonical, structured data, speed).
+- **Pages:** title, description, focus keyword, share image, canonical and noindex for every page, with a live Google and WhatsApp/LinkedIn preview. Service, course and job pages are written automatically and can be overridden. (Level 1 can edit these; everything below is Super Admin only.)
+- **Business & schema:** company description, address, hours, areas served and official profiles → published as Organization / ProfessionalService structured data, with a service catalogue.
+- **Technical:** live address, www / HTTPS preference, block-all switch for test copies, AI-crawler switch, default share image, extra robots.txt rules, extra notes for `llms.txt`, **IndexNow** (instant notice to Bing, Yandex and others when you change content).
+- **Tracking & verification:** Google/Bing/Yandex/Facebook/Pinterest verification (paste the code or the whole meta tag), GA4, Tag Manager, Meta Pixel, Microsoft Clarity, custom head/body code. Never loaded on admin, application or portal pages.
+- **Redirects & 404s:** 301/302 redirect manager and a log of broken links with one-click fixes.
+- **Visibility checklist:** Google Business Profile, Bing Places, LinkedIn, directories, reviews, etc. Profiles marked Live are added to the structured data.
+
+Generated automatically: `sitemap.xml`, `robots.txt`, `llms.txt`, per-page canonical / Open Graph / Twitter cards, JSON-LD (Organization, WebSite, Breadcrumbs, Service, Course, JobPosting), one landing page per service (`service.php?s=…`), a branded 404 page.
+
+**After uploading:** (1) fill the Business tab (address matters most for Google Maps), (2) verify the site in Google Search Console and Bing Webmaster Tools, paste the codes in Tracking, submit `sitemap.xml`, (3) press "Notify search engines now", (4) work through the Visibility checklist.
+**Upgrade notes:** replace `.htaccess` (it adds the sitemap/robots rewrites, an error page and caching); keep `data/`. If `/sitemap.xml` shows "not found", use `/sitemap.php` and `/robots.php` (your host has no URL rewriting). If the site lives in a sub-folder, change `ErrorDocument 404 /404.php` in `.htaccess`. Turn on "Force HTTPS" only after the SSL certificate works.

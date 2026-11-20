@@ -14,22 +14,22 @@ include __DIR__ . '/inc/head.php';
       </div></div></div><div class="slide" aria-roledescription="slide">
       <div class="slide-bg" style="background-image:url(assets/img/hero-2.svg)"></div>
       <div class="container"><div class="slide-content anim">
-        <span class="eyebrow">Enable</span><h1>Build reliable <em>digital</em> foundations</h1><p class="lead">Technical support, Microsoft 365, identity and access, and cloud infrastructure that keep your people productive.</p>
+        <span class="eyebrow">Enable</span><h2>Build reliable <em>digital</em> foundations</h2><p class="lead">Technical support, Microsoft 365, identity and access, and cloud infrastructure that keep your people productive.</p>
         <div class="slide-actions"><a class="btn btn-primary" href="services.php#it-cloud-cybersecurity">IT, Cloud &amp; Cybersecurity <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a><a class="btn btn-outline" href="contact.php">Contact Us</a></div>
       </div></div></div><div class="slide" aria-roledescription="slide">
       <div class="slide-bg" style="background-image:url(assets/img/hero-3.svg)"></div>
       <div class="container"><div class="slide-content anim">
-        <span class="eyebrow">Protect</span><h1>Secure systems, devices and <em>data</em></h1><p class="lead">Endpoint management with Intune, Defender for Endpoint and Zoho Endpoint Central, with monitoring and compliance built in.</p>
+        <span class="eyebrow">Protect</span><h2>Secure systems, devices and <em>data</em></h2><p class="lead">Endpoint management with Intune, Defender for Endpoint and Zoho Endpoint Central, with monitoring and compliance built in.</p>
         <div class="slide-actions"><a class="btn btn-primary" href="services.php#endpoint-management-security">Protect Your Business <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a><a class="btn btn-outline" href="contact.php">Contact Us</a></div>
       </div></div></div><div class="slide" aria-roledescription="slide">
       <div class="slide-bg" style="background-image:url(assets/img/hero-4.svg)"></div>
       <div class="container"><div class="slide-content anim">
-        <span class="eyebrow">Empower · Products</span><h1>Digital products and brands that <em>grow</em> with you</h1><p class="lead">Websites, web applications, product design and branding that support customer engagement and business growth.</p>
+        <span class="eyebrow">Empower · Products</span><h2>Digital products and brands that <em>grow</em> with you</h2><p class="lead">Websites, web applications, product design and branding that support customer engagement and business growth.</p>
         <div class="slide-actions"><a class="btn btn-primary" href="services.php#software-digital-solutions">Software &amp; Digital Solutions <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a><a class="btn btn-outline" href="contact.php">Contact Us</a></div>
       </div></div></div><div class="slide" aria-roledescription="slide">
       <div class="slide-bg" style="background-image:url(assets/img/hero-5.svg)"></div>
       <div class="container"><div class="slide-content anim">
-        <span class="eyebrow">Empower · People</span><h1>Build skills that <em>power</em> careers and teams</h1><p class="lead">Practical, career-ready training in front-end, cloud, cybersecurity, DevOps and product design, virtual or in person.</p>
+        <span class="eyebrow">Empower · People</span><h2>Build skills that <em>power</em> careers and teams</h2><p class="lead">Practical, career-ready training in front-end, cloud, cybersecurity, DevOps and product design, virtual or in person.</p>
         <div class="slide-actions"><a class="btn btn-primary" href="training.php">Explore Training <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a><a class="btn btn-outline" href="contact.php">Contact Us</a></div>
       </div></div></div></div>
   <div class="hero-ctrl"><div class="container"><div class="dots"><button aria-label="Go to slide 1"></button><button aria-label="Go to slide 2"></button><button aria-label="Go to slide 3"></button><button aria-label="Go to slide 4"></button><button aria-label="Go to slide 5"></button></div>
@@ -70,7 +70,7 @@ include __DIR__ . '/inc/head.php';
 <section class="section soft"><div class="container">
   <div class="sec-head center reveal"><span class="eyebrow">Our Services</span><h2>Everything from reliable IT to digital products and training</h2>
   <p>IT, cloud and cybersecurity, software and digital solutions, training and consulting, from one connected partner.</p></div>
-  <div class="cards-3"><?php foreach ($__svcs as $__i => $s): ?><a class="card reveal d<?= $__i % 4 ?>" href="services.php#<?= e($s['slug']) ?>"><div class="ico"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-<?= e(svc_icon($s['icon'])) ?>"/></svg></div><h3><?= e($s['title']) ?></h3><p><?= e($s['short']) ?></p><span class="more">Learn more <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></span></a><?php endforeach; ?></div>
+  <div class="cards-3"><?php foreach ($__svcs as $__i => $s): ?><a class="card reveal d<?= $__i % 4 ?>" href="service.php?s=<?= e($s['slug']) ?>"><div class="ico"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-<?= e(svc_icon($s['icon'])) ?>"/></svg></div><h3><?= e($s['title']) ?></h3><p><?= e($s['short']) ?></p><span class="more">Learn more <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></span></a><?php endforeach; ?></div>
   <div style="text-align:center;margin-top:48px"><a class="btn btn-dark" href="services.php">View all services <svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></a></div>
 </div></section><section class="section soft"><div class="container"><div class="conversa reveal">
   <div class="c-txt"><span class="eyebrow">New from Empre Technologies</span><h2>Conversa AI: customer conversations that convert</h2>

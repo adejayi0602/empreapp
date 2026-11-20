@@ -10,7 +10,7 @@
       <div class="f-social"><a href="https://www.instagram.com/empre_technologies" aria-label="Instagram" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-instagram"/></svg></a><a href="https://www.linkedin.com/company/empre-technologies" aria-label="LinkedIn" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-linkedin"/></svg></a></div>
     </div>
     <div><h4>Menu</h4><ul><li><a href="index.php"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg>Home</a></li><li><a href="about.php"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg>About Us</a></li><li><a href="services.php"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg>Our Services</a></li><li><a href="training.php"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg>Training</a></li><li><a href="careers.php"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg>Careers</a></li><li><a href="contact.php"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg>Contact</a></li><li><a href="<?= e(function_exists('conversa_url') ? conversa_url() : 'https://conversaai.com.ng/') ?>" target="_blank" rel="noopener"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg>Conversa AI (sign up)</a></li></ul></div>
-    <div><h4>Our Services</h4><ul><?php $__fs = function_exists("site_services") ? site_services() : []; foreach ($__fs as $__s): ?><li><a href="services.php#<?= e($__s['slug']) ?>"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg><?= e($__s['title']) ?></a></li><?php endforeach; ?></ul></div>
+    <div><h4>Our Services</h4><ul><?php $__fs = function_exists("site_services") ? site_services() : []; foreach ($__fs as $__s): ?><li><a href="service.php?s=<?= e($__s['slug']) ?>"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg><?= e($__s['title']) ?></a></li><?php endforeach; ?></ul></div>
     <div><h4>Contact Us</h4>
       <ul class="contact-list">
         <li><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-mail"/></svg><a href="mailto:info@empretechnologies.com.ng">info@empretechnologies.com.ng</a></li>
@@ -28,6 +28,7 @@
 </footer>
 <button class="to-top" aria-label="Back to top"><svg class="ic" aria-hidden="true" viewBox="0 0 24 24"><use href="#i-arrow"/></svg></button>
 <script src="assets/js/main.js"></script>
+<?php if (function_exists('seo_body_end')) seo_body_end(); ?>
 <!-- Conversa AI chat widget: sits at the bottom-right of every public page (the back-to-top button is lifted above it in style.css) -->
 <script src="https://conversaai.com.ng/widget.js" data-key="pk_c534d3ea0bb85253d069" async></script>
 </body>

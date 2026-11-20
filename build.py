@@ -83,16 +83,7 @@ def head(title, desc, page):
     return f'''<!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>{title}</title>
-<meta name="description" content="{desc}">
-<meta name="theme-color" content="#F77F00">
-<meta property="og:title" content="{title}"><meta property="og:description" content="{desc}"><meta property="og:type" content="website">
-<link rel="icon" type="image/png" href="assets/img/favicon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/style.css?v=8">
+<?php seo_head(__T__, __D__, __A__); ?>
 </head>
 <body>
 {SPRITE}
@@ -141,7 +132,7 @@ def footer():
     q = "".join(f'<li><a href="{h}">{ic("arrow")}{t}</a></li>' for h, t in NAV)
     q += f'<li><a href="{CONVERSA_PHP}" target="_blank" rel="noopener">{ic("arrow")}Conversa AI (sign up)</a></li>'
     svc = ('<?php $__fs = function_exists("site_services") ? site_services() : []; foreach ($__fs as $__s): ?>'
-           f'<li><a href="services.php#<?= e($__s[\'slug\']) ?>">{ic("arrow")}<?= e($__s[\'title\']) ?></a></li><?php endforeach; ?>')
+           f'<li><a href="service.php?s=<?= e($__s[\'slug\']) ?>">{ic("arrow")}<?= e($__s[\'title\']) ?></a></li><?php endforeach; ?>')
     return f'''</main>
 <footer class="footer">
   <div class="container footer-main">
@@ -169,6 +160,7 @@ def footer():
 </footer>
 <button class="to-top" aria-label="Back to top">{ic("arrow")}</button>
 <script src="assets/js/main.js"></script>
+<?php if (function_exists('seo_body_end')) seo_body_end(); ?>
 <!-- Conversa AI chat widget: sits at the bottom-right of every public page (the back-to-top button is lifted above it in style.css) -->
 <script src="https://conversaai.com.ng/widget.js" data-key="pk_c534d3ea0bb85253d069" async></script>
 </body>
@@ -232,7 +224,7 @@ def what_we_do(soft=False):
             '  <div class="cards-4"><?php foreach ($__areas as $__i => $a): ?>' + card + '<?php endforeach; ?></div>\n</div></section>')
 
 def services_grid(soft=True):
-    card = ('<a class="card reveal d<?= $__i % 4 ?>" href="services.php#<?= e($s[\'slug\']) ?>">'
+    card = ('<a class="card reveal d<?= $__i % 4 ?>" href="service.php?s=<?= e($s[\'slug\']) ?>">'
             f'<div class="ico">{icp("$s")}</div><h3><?= e($s[\'title\']) ?></h3><p><?= e($s[\'short\']) ?></p><span class="more">Learn more {ic("arrow")}</span></a>')
     return ('<?php $__svcs = site_services(); ?>\n'
             f'<section class="section{" soft" if soft else ""}"><div class="container">\n'
@@ -330,7 +322,7 @@ def page_home():
     sl = "".join(f'''<div class="slide{" is-active" if n=="1" else ""}" aria-roledescription="slide">
       <div class="slide-bg" style="background-image:url(assets/img/hero-{n}.svg)"></div>
       <div class="container"><div class="slide-content anim">
-        <span class="eyebrow">{eb}</span><h1>{h}</h1><p class="lead">{p}</p>
+        <span class="eyebrow">{eb}</span><{"h1" if n=="1" else "h2"}>{h}</{"h1" if n=="1" else "h2"}><p class="lead">{p}</p>
         <div class="slide-actions"><a class="btn btn-primary" href="{href}">{cta_t} {ic("arrow")}</a><a class="btn btn-outline" href="contact.php">Contact Us</a></div>
       </div></div></div>''' for n, eb, h, p, cta_t, href in slides)
     dots = "".join(f'<button aria-label="Go to slide {i+1}"></button>' for i in range(len(slides)))
@@ -361,7 +353,7 @@ def page_services():
            '  <div class="reveal d1"><span class="eyebrow">Service <?= sprintf(\'%02d\', $__n) ?></span><h2><?= e($s[\'title\']) ?></h2>\n'
            '    <?php foreach (svc_paras($s[\'description\'] ?: $s[\'short\']) as $__p): ?><p><?= e($__p) ?></p><?php endforeach; ?>\n'
            f'    <ul class="checks"><?php foreach (svc_lines($s[\'points\']) as $__pt): ?><li><span class="tick">{tick}</span><span><?= e($__pt) ?></span></li><?php endforeach; ?></ul>\n'
-           f'    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"<?= preg_match(\'~^https?://~i\', $__cta) ? \' target="_blank" rel="noopener"\' : \'\' ?>><?= e($__lbl) ?> {ic("arrow")}</a></div>\n</article>\n')
+           f'    <a class="btn btn-primary" style="margin-top:14px" href="<?= e($__cta) ?>"<?= preg_match(\'~^https?://~i\', $__cta) ? \' target="_blank" rel="noopener"\' : \'\' ?>><?= e($__lbl) ?> {ic("arrow")}</a> <a class="btn btn-outline-dark" style="margin-top:14px" href="service.php?s=<?= e($s[\'slug\']) ?>">Details</a></div>\n</article>\n')
     area = ('<section class="area" id="<?= e($a[\'slug\']) ?>"><div class="container">\n'
             '  <div class="area-head reveal"><span class="eyebrow">Service area <?= sprintf(\'%02d\', $__ai + 1) ?></span><h2><?= e($a[\'title\']) ?></h2><p><?= e($a[\'tagline\']) ?></p></div>\n'
             '  <?php foreach ($a[\'services\'] as $s): ?>' + svc + '  <?php endforeach; ?>\n'
@@ -483,7 +475,7 @@ def hero_svg(n):
 # ------------------------------------------------------------------ php partials
 def write_partials():
     h = head("__T__", "__D__", "") + header()
-    h = h.replace("__T__", "<?= e($title) ?>").replace("__D__", "<?= e($desc) ?>")
+    h = h.replace("__T__", "$title ?? ''").replace("__D__", "$desc ?? ''").replace("__A__", "$active ?? ''")
     open(os.path.join(ROOT, "inc/head.php"), "w", encoding="utf-8").write(h)
     open(os.path.join(ROOT, "inc/foot.php"), "w", encoding="utf-8").write(footer())
 write_partials()

@@ -7,22 +7,32 @@ $a = q1("SELECT a.*, j.title jtitle, j.company jcompany, j.slug jslug, j.status 
 if (!$a) { http_response_code(404); $title = 'Not found'; $desc = ''; include __DIR__ . '/inc/head.php'; echo '<section class="section"><div class="container" style="text-align:center"><h1>Application not found</h1><p><a href="portal.php">Back to my applications</a></p></div></section>'; include __DIR__ . '/inc/foot.php'; exit; }
 $id = (int)$a['id'];
 $canEdit = (int)$a['edit_unlocked'] === 1 && $a['status'] === 'More Details Needed';
-$errors = []; $v = ['name' => $a['name'], 'phone' => $a['phone'], 'linkedin' => $a['linkedin'], 'cover_letter' => $a['cover_letter'], 'answer' => $a['answer'], 'message' => ''];
+$errors = []; $v = ['name' => $a['name'], 'phone' => $a['phone'], 'linkedin' => $a['linkedin'], 'portfolio' => $a['portfolio'] ?? '', 'location' => $a['location'] ?? '', 'expected_pay' => $a['expected_pay'] ?? '', 'available_from' => $a['available_from'] ?? '', 'cover_letter' => $a['cover_letter'], 'answer' => $a['answer'], 'message' => ''];
+$onb = q1("SELECT * FROM onboardings WHERE application_id=?", [$id]);
 $nDocs = (int)qv("SELECT COUNT(*) FROM application_files WHERE application_id=?", [$id]);
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$_POST && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) $errors['form'] = 'Your files are larger than this server allows (maximum ' . upload_limit_label() . ' in total). Please send smaller files.';
     else {
         csrf_check();
+        if (post('action') === 'onb_task') {   // applicant completes one of their onboarding tasks
+            $t = q1("SELECT t.* FROM onboarding_tasks t JOIN onboardings o ON o.id=t.onboarding_id WHERE t.id=? AND o.application_id=? AND t.owner='Employee'", [(int)post('task'), $id]);
+            if (!$t || (int)$t['done']) { flash('That task is not available.', 'err'); redirect('portal-app.php?id=' . $id . '#onboarding'); }
+            $fid = null;
+            if ((int)$t['needs_file']) {
+                [$s1, $o1, $er1] = store_upload($_FILES['file'] ?? null, DOC_TYPES);
+                if (!$s1) { flash($er1 === 'nofile' ? 'Please choose the file to upload for this task.' : $er1, 'err'); redirect('portal-app.php?id=' . $id . '#onboarding'); }
+                $fid = run("INSERT INTO application_files(application_id,file,original,label,created_at) VALUES(?,?,?,?,?)", [$id, $s1, $o1, $t['title'], now()]);
+            }
+            run("UPDATE onboarding_tasks SET done=1, done_at=?, done_by=?, file_id=? WHERE id=?", [now(), $me['name'], $fid, $t['id']]);
+            app_event($id, 'onboarding', 'Onboarding task completed: ' . $t['title'], $me['name']);
+            flash('Thank you. “' . $t['title'] . '” is marked as done.'); redirect('portal-app.php?id=' . $id . '#onboarding');
+        }
         if (!$canEdit) { flash('This application cannot be edited right now. Editing opens only when the hiring team asks for more details.', 'err'); redirect('portal-app.php?id=' . $id); }
-        foreach (['name', 'phone', 'linkedin'] as $k) $v[$k] = line(post($k, 200));
+        foreach (['name', 'phone', 'linkedin', 'portfolio', 'location', 'expected_pay', 'available_from'] as $k) $v[$k] = line(post($k, 250));
         $v['cover_letter'] = post('cover_letter', 3500); $v['answer'] = post('answer', 2500); $v['message'] = post('message', 1500);
         if (mb_strlen($v['name']) < 3 || !str_contains($v['name'], ' ')) $errors['name'] = 'Please enter your full name.';
-        if (!preg_match('/^\+?[0-9][0-9 \-()]{6,18}$/', $v['phone'])) $errors['phone'] = 'Enter a valid phone number.';
-        $li = $v['linkedin']; if ($li !== '' && !preg_match('~^https?://~i', $li)) $li = 'https://' . $li;
-        if ($li === '' || !filter_var($li, FILTER_VALIDATE_URL) || !preg_match('/(^|\.)linkedin\.com$/', strtolower((string)parse_url($li, PHP_URL_HOST)))) $errors['linkedin'] = 'Enter the link to your LinkedIn profile.';
-        else $v['linkedin'] = mb_substr($li, 0, 250);
-        if (mb_strlen(trim($v['cover_letter'])) < 100) $errors['cover_letter'] = 'Your cover letter should be at least 100 characters.';
+        $errors += hr_validate_fields($v);
         if ($a['jq'] && $a['jqr'] && mb_strlen(trim($v['answer'])) < 10) $errors['answer'] = 'Please answer this question.';
         if (mb_strlen(trim($v['message'])) < 5) $errors['message'] = 'Please add a short note about what you changed or added.';
         // new files (validated here, stored only if everything else is fine)
@@ -41,8 +51,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             try {
                 $pdo = db(); $pdo->beginTransaction();
                 $oldCv = $a['cv_file']; $cvFile = $newCv[0] ?: $a['cv_file']; $cvName = $newCv[0] ? $newCv[1] : $a['cv_name'];
-                run("UPDATE applications SET name=?,phone=?,linkedin=?,cover_letter=?,answer=?,cv_file=?,cv_name=?,status='Under Review',edit_unlocked=0,updated_at=? WHERE id=? AND applicant_id=?",
-                    [$v['name'], $v['phone'], $v['linkedin'], trim($v['cover_letter']), trim($v['answer']), $cvFile, $cvName, now(), $id, $me['id']]);
+                run("UPDATE applications SET name=?,phone=?,linkedin=?,portfolio=?,location=?,expected_pay=?,available_from=?,cover_letter=?,answer=?,cv_file=?,cv_name=?,status='Under Review',edit_unlocked=0,updated_at=? WHERE id=? AND applicant_id=?",
+                    [$v['name'], $v['phone'], $v['linkedin'], $v['portfolio'], $v['location'], $v['expected_pay'], $v['available_from'], trim($v['cover_letter']), trim($v['answer']), $cvFile, $cvName, now(), $id, $me['id']]);
                 foreach ($newDocs as [$s, $o]) run("INSERT INTO application_files(application_id,file,original,label,created_at) VALUES(?,?,?,?,?)", [$id, $s, $o, 'Added by applicant', now()]);
                 $bits = [];
                 if ($newCv[0]) $bits[] = 'new CV'; if ($newDocs) $bits[] = count($newDocs) . ' extra document' . (count($newDocs) > 1 ? 's' : '');
@@ -86,7 +96,7 @@ $err = fn($k) => isset($errors[$k]) ? '<span class="req-err">' . e($errors[$k]) 
   <div class="status-panel tone-<?= e($tone) ?>">
     <div><span class="st st-<?= e(strtolower(str_replace(' ', '-', $a['status']))) ?>"><?= e($a['status']) ?></span><h2><?= e($hl) ?></h2><p><?= e($msg) ?></p>
     <?php if ($a['status'] === 'More Details Needed' && trim((string)$a['info_request'])): ?><blockquote><b>From the hiring team:</b><br><?= nl2br(e($a['info_request'])) ?></blockquote><?php endif; ?>
-    <?php if (in_array($a['status'], ['Accepted', 'Rejected', 'Not Qualified'], true) && trim((string)$a['decision_note'])): ?><blockquote><b>Note from the hiring team:</b><br><?= nl2br(e($a['decision_note'])) ?></blockquote><?php endif; ?></div>
+    <?php if (in_array($a['status'], ['Accepted', 'Hired', 'Rejected', 'Not Qualified'], true) && trim((string)$a['decision_note'])): ?><blockquote><b>Note from the hiring team:</b><br><?= nl2br(e($a['decision_note'])) ?></blockquote><?php endif; ?></div>
     <div class="sp-job"><small>Job status</small><span class="st st-<?= e(strtolower($jstate)) ?>"><?= e($jstate) ?></span><?php if ($a['jclosing']): ?><small>Closing date: <?= e(dt($a['jclosing'])) ?></small><?php endif; ?><a href="job.php?j=<?= e($a['jslug']) ?>">View the role</a></div>
   </div>
 
@@ -96,29 +106,59 @@ $err = fn($k) => isset($errors[$k]) ? '<span class="req-err">' . e($errors[$k]) 
       <div class="form-card" id="update">
         <h3>Update your application</h3><p>The hiring team opened your application for changes. Update what is needed, add documents and tell us what you changed. Once you send it, editing closes again.</p>
         <form method="post" enctype="multipart/form-data" action="portal-app.php?id=<?= $id ?>" novalidate><?= csrf_field() ?><input type="hidden" name="id" value="<?= $id ?>">
-          <div class="field<?= isset($errors['name']) ? ' bad' : '' ?>"><label for="name">Full name</label><input id="name" name="name" value="<?= e($v['name']) ?>" required><?= $err('name') ?></div>
+          <div class="field<?= isset($errors['name']) ? ' bad' : '' ?>"><label for="name">Full name *</label><input id="name" name="name" value="<?= e($v['name']) ?>" required><?= $err('name') ?></div>
           <div class="form-row"><div class="field"><label>Email (cannot be changed)</label><input value="<?= e($a['email']) ?>" readonly></div>
-            <div class="field<?= isset($errors['phone']) ? ' bad' : '' ?>"><label for="phone">Phone number</label><input id="phone" name="phone" value="<?= e($v['phone']) ?>" required><?= $err('phone') ?></div></div>
-          <div class="field<?= isset($errors['linkedin']) ? ' bad' : '' ?>"><label for="linkedin">LinkedIn profile</label><input id="linkedin" name="linkedin" value="<?= e($v['linkedin']) ?>" required><?= $err('linkedin') ?></div>
-          <div class="field<?= isset($errors['cv']) ? ' bad' : '' ?>"><label for="cv">Replace your CV (optional)</label>
-            <label class="dropfile" for="cv"><?= svg_icon('upload') ?><span><b id="cv-name">Current: <?= e($a['cv_name']) ?></b><small>Choose a new file only if you want to replace it · PDF, DOC, DOCX · up to <?= e(upload_limit_label()) ?></small></span></label>
-            <input id="cv" name="cv" type="file" accept=".pdf,.doc,.docx" class="sr-file"><?= $err('cv') ?></div>
+            <?php if (field_shown('phone')): ?><div class="field<?= isset($errors['phone']) ? ' bad' : '' ?>"><label for="phone"><?= e(field_label('phone')) ?></label><input id="phone" name="phone" value="<?= e($v['phone']) ?>" <?= field_req('phone') ? 'required' : '' ?>><?= $err('phone') ?></div><?php endif; ?></div>
+          <?php if (field_shown('linkedin')): ?><div class="field<?= isset($errors['linkedin']) ? ' bad' : '' ?>"><label for="linkedin"><?= e(field_label('linkedin')) ?></label><input id="linkedin" name="linkedin" value="<?= e($v['linkedin']) ?>" <?= field_req('linkedin') ? 'required' : '' ?>><?= $err('linkedin') ?></div><?php endif; ?>
+          <?php foreach (['portfolio' => 'url', 'location' => 'text', 'expected_pay' => 'text', 'available_from' => 'date'] as $xk => $xt): if (field_shown($xk)): ?>
+          <div class="field<?= isset($errors[$xk]) ? ' bad' : '' ?>"><label for="<?= $xk ?>"><?= e(field_label($xk)) ?></label><input id="<?= $xk ?>" name="<?= $xk ?>" type="<?= $xt === 'url' ? 'text' : $xt ?>" value="<?= e($v[$xk]) ?>" <?= field_req($xk) ? 'required' : '' ?>><?= $err($xk) ?></div><?php endif; endforeach; ?>
+          <?php if (field_shown('cv')): ?><div class="field<?= isset($errors['cv']) ? ' bad' : '' ?>"><label for="cv">Replace your CV (optional)</label>
+            <label class="dropfile" for="cv"><?= svg_icon('upload') ?><span><b id="cv-name"><?= $a['cv_name'] ? 'Current: ' . e($a['cv_name']) : 'Choose a file' ?></b><small>Choose a new file only if you want to replace it · PDF, DOC, DOCX · up to <?= e(upload_limit_label()) ?></small></span></label>
+            <input id="cv" name="cv" type="file" accept=".pdf,.doc,.docx" class="sr-file"><?= $err('cv') ?></div><?php endif; ?>
           <div class="field<?= isset($errors['docs']) ? ' bad' : '' ?>"><label for="docs">Add documents (optional)</label>
             <label class="dropfile" for="docs"><?= svg_icon('upload') ?><span><b id="docs-name">Choose files</b><small>Certificates, portfolio, samples · PDF, DOC, DOCX, PNG, JPG · up to <?= e(upload_limit_label()) ?> each</small></span></label>
             <input id="docs" name="docs[]" type="file" multiple accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" class="sr-file"><?= $err('docs') ?></div>
-          <div class="field<?= isset($errors['cover_letter']) ? ' bad' : '' ?>"><label for="cover_letter">Cover letter</label><textarea id="cover_letter" name="cover_letter" rows="7" maxlength="3500" required><?= e($v['cover_letter']) ?></textarea><?= $err('cover_letter') ?></div>
+          <div class="field<?= isset($errors['cover_letter']) ? ' bad' : '' ?>"><label for="cover_letter"><?= e(field_label('cover_letter', 'Cover letter')) ?></label><textarea id="cover_letter" name="cover_letter" rows="7" maxlength="3500" <?= field_req('cover_letter') ? 'required' : '' ?>><?= e($v['cover_letter']) ?></textarea><?= $err('cover_letter') ?></div>
           <?php if (trim((string)$a['jq'])): ?><div class="field<?= isset($errors['answer']) ? ' bad' : '' ?>"><label for="answer"><?= e($a['jq']) ?></label><textarea id="answer" name="answer" rows="4" maxlength="2500"><?= e($v['answer']) ?></textarea><?= $err('answer') ?></div><?php endif; ?>
           <div class="field<?= isset($errors['message']) ? ' bad' : '' ?>"><label for="message">Message to the hiring team *</label><textarea id="message" name="message" rows="3" maxlength="1500" placeholder="Briefly say what you changed or added." required><?= e($v['message']) ?></textarea><?= $err('message') ?></div>
           <button class="btn btn-primary" type="submit">Send update <?= svg_icon('arrow') ?></button>
         </form>
       </div>
     <?php endif; ?>
+<?php if ($a['interview_at'] && !in_array($a['status'], ['Rejected', 'Not Qualified'], true)): ?>
+      <div class="detail-card hr-card"><h3><?= svg_icon('calendar') ?> Your interview</h3>
+        <p class="hr-when"><?= e(date('l, j F Y', strtotime($a['interview_at']))) ?><b><?= e(date('g:i A', strtotime($a['interview_at']))) ?></b></p>
+        <?php if (trim((string)$a['interview_info'])): ?><div class="msgbox"><?= nl2br(e($a['interview_info'])) ?></div><?php endif; ?>
+        <p class="muted small" style="margin-top:10px">Cannot make it? Reply to the invitation email and we will find another time.</p></div>
+<?php endif; ?>
+<?php if ($onb): $tasks = q("SELECT * FROM onboarding_tasks WHERE onboarding_id=? ORDER BY sort,id", [$onb['id']]); [$od, $ot] = hr_onb_progress((int)$onb['id']); ?>
+      <div class="detail-card hr-card" id="onboarding"><h3><?= svg_icon('check') ?> Your onboarding</h3>
+        <p class="muted" style="margin-top:-6px">Welcome aboard! <?= $onb['start_date'] ? 'Your start date is <b>' . e(dt($onb['start_date'], 'l, j F Y')) . '</b>. ' : '' ?>Complete the tasks marked <b>You</b>; our team handles the rest.</p>
+        <?= hr_progress_bar($od, $ot) ?>
+        <?php foreach (ONB_CATEGORIES as $cat): $ct = array_filter($tasks, fn($t) => $t['category'] === $cat); if (!$ct) continue; ?>
+          <h4 class="onb-cat"><?= e($cat) ?></h4>
+          <?php foreach ($ct as $t): $mine = $t['owner'] === 'Employee'; ?>
+          <div class="onb-task <?= (int)$t['done'] ? 'done' : '' ?>">
+            <span class="tick"><?= (int)$t['done'] ? svg_icon('check') : '' ?></span>
+            <div class="ot-main"><b><?= e($t['title']) ?></b><?php if ($t['description']): ?><small><?= e($t['description']) ?></small><?php endif; ?>
+              <small class="ot-meta"><?= $mine ? 'You' : 'Empre team' ?><?= $t['due_date'] ? ' · due ' . e(dt($t['due_date'])) : '' ?><?= (int)$t['done'] ? ' · done ' . e(dt($t['done_at'])) : '' ?></small>
+              <?php if ($mine && !(int)$t['done']): ?>
+              <form method="post" enctype="multipart/form-data" action="portal-app.php?id=<?= $id ?>" class="ot-form"><?= csrf_field() ?><input type="hidden" name="id" value="<?= $id ?>"><input type="hidden" name="action" value="onb_task"><input type="hidden" name="task" value="<?= (int)$t['id'] ?>">
+                <?php if ((int)$t['needs_file']): ?><input type="file" name="file" accept=".pdf,.doc,.docx,.png,.jpg,.jpeg" required><?php endif; ?>
+                <button class="btn btn-primary btn-sm" type="submit"><?= (int)$t['needs_file'] ? 'Upload and mark done' : 'Mark as done' ?></button></form>
+              <?php endif; ?></div></div>
+          <?php endforeach; endforeach; ?>
+      </div>
+<?php endif; ?>
       <div class="detail-card"><h3>Your application</h3>
-        <dl class="kv2"><div><dt>Name</dt><dd><?= e($a['name']) ?></dd></div><div><dt>Email</dt><dd><?= e($a['email']) ?></dd></div><div><dt>Phone</dt><dd><?= e($a['phone']) ?></dd></div>
-          <div><dt>LinkedIn</dt><dd><a href="<?= e($a['linkedin']) ?>" target="_blank" rel="noopener nofollow"><?= e(preg_replace('~^https?://(www\.)?~i', '', (string)$a['linkedin'])) ?></a></dd></div>
-          <div><dt>CV</dt><dd><a class="filelink" href="portal-file.php?a=<?= $id ?>&amp;f=cv"><?= svg_icon('file') ?><?= e($a['cv_name']) ?></a></dd></div>
+        <dl class="kv2"><div><dt>Name</dt><dd><?= e($a['name']) ?></dd></div><div><dt>Email</dt><dd><?= e($a['email']) ?></dd></div><?php if ($a['phone']): ?><div><dt>Phone</dt><dd><?= e($a['phone']) ?></dd></div><?php endif; ?>
+          <?php if ($a['linkedin']): ?><div><dt>LinkedIn</dt><dd><a href="<?= e($a['linkedin']) ?>" target="_blank" rel="noopener nofollow"><?= e(preg_replace('~^https?://(www\.)?~i', '', (string)$a['linkedin'])) ?></a></dd></div><?php endif; ?>
+          <?php if ($a['portfolio']): ?><div><dt>Portfolio</dt><dd><a href="<?= e($a['portfolio']) ?>" target="_blank" rel="noopener nofollow"><?= e(preg_replace('~^https?://(www\.)?~i', '', (string)$a['portfolio'])) ?></a></dd></div><?php endif; ?>
+          <?php foreach (['location' => 'Location', 'expected_pay' => 'Expected pay'] as $xk => $xl): if (trim((string)$a[$xk])): ?><div><dt><?= $xl ?></dt><dd><?= e($a[$xk]) ?></dd></div><?php endif; endforeach; ?>
+          <?php if ($a['available_from']): ?><div><dt>Available from</dt><dd><?= e(dt($a['available_from'])) ?></dd></div><?php endif; ?>
+          <?php if ($a['cv_file']): ?><div><dt>CV</dt><dd><a class="filelink" href="portal-file.php?a=<?= $id ?>&amp;f=cv"><?= svg_icon('file') ?><?= e($a['cv_name']) ?></a></dd></div><?php endif; ?>
           <?php foreach ($files as $f): ?><div><dt>Document</dt><dd><a class="filelink" href="portal-file.php?a=<?= $id ?>&amp;f=<?= (int)$f['id'] ?>"><?= svg_icon('file') ?><?= e($f['original']) ?></a></dd></div><?php endforeach; ?></dl>
-        <h4>Cover letter</h4><div class="msgbox"><?= nl2br(e($a['cover_letter'])) ?></div>
+        <?php if (trim((string)$a['cover_letter'])): ?><h4>Cover letter</h4><div class="msgbox"><?= nl2br(e($a['cover_letter'])) ?></div><?php endif; ?>
         <?php if (trim((string)$a['jq'])): ?><h4><?= e($a['jq']) ?></h4><div class="msgbox"><?= nl2br(e($a['answer'] ?: '—')) ?></div><?php endif; ?>
         <?php if (!$canEdit): ?><p class="muted small" style="margin-top:16px"><?= svg_icon('lock') ?> Your application is locked. If the hiring team needs anything more, they will open it for editing and tell you here.</p><?php endif; ?>
       </div>

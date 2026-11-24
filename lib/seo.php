@@ -145,7 +145,7 @@ function seo_head(string $title, string $desc, string $active = ''): void {
     $o[] = '<link rel="sitemap" type="application/xml" title="Sitemap" href="' . e(seo_base()) . '/sitemap.xml">';
     $o[] = '<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>';
     $o[] = '<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">';
-    $o[] = '<link rel="stylesheet" href="assets/css/style.css?v=9">';
+    $o[] = '<link rel="stylesheet" href="assets/css/style.css?v=10">';
     if (!$noindex) foreach (seo_jsonld($key, $title, $desc, $canon) as $ld)
         $o[] = '<script type="application/ld+json">' . json_encode($ld, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP) . '</script>';
     if (!$private) $o[] = seo_tracking_head();

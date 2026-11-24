@@ -89,3 +89,68 @@ details.card summary.btn{list-style:none}
 .serp{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;font-family:Arial,sans-serif}.serp .u{color:#202124;font-size:13px;word-break:break-all}.serp .t{color:#1a0dab;font-size:20px;line-height:1.3;margin:3px 0}.serp .d{color:#4d5156;font-size:14px;line-height:1.58}
 .social{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff}.social img{width:100%;display:block}.social>div{padding:10px 14px;background:#f2f3f5}
 .cnt{font-size:12px;font-weight:600;color:var(--muted)}.cnt.ok{color:#1E6B3A}.cnt.no{color:#9B2C20}
+
+/* ===== HR & Careers ===== */
+.side nav .nav-h{font-size:10.5px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7d7672;padding:16px 14px 6px}
+.side nav .nav-h:first-child{padding-top:4px}
+.b-shortlisted{background:#EDE6FA;color:#5B3AA8}.b-interview{background:#E0F3F4;color:#0E6C73}.b-hired{background:#1E6B3A;color:#fff}
+.b-in-progress{background:#E3EEFB;color:#1D5FA8}
+.btn.good{background:#1E6B3A}.btn.good:hover{background:#17522d}.btn.warnb{background:#B85A00}.btn.warnb:hover{background:#964a00}
+.decide .dh{font-size:11px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin-top:8px}
+.decide .hire{display:grid;gap:6px;background:var(--brand-50);border:1px solid var(--brand-100);border-radius:12px;padding:12px}
+.check-line{display:flex;gap:9px;align-items:center;font-weight:600;font-size:13.5px;color:var(--ink);margin:0 0 12px;cursor:pointer}
+.check-line input{width:auto;margin:0}
+.card.attn{border-color:var(--brand);background:linear-gradient(180deg,var(--brand-50),#fff 70%)}
+.prog{height:8px;border-radius:99px;background:#EFE9E4;overflow:hidden;margin:6px 0 4px}.prog span{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--brand),#FFA24D)}
+.funnel{display:grid;gap:10px}.fn-row{display:grid;grid-template-columns:110px 1fr 34px;gap:12px;align-items:center;font-size:13.5px}
+.fn-bar{height:12px;background:#F1ECE8;border-radius:99px;overflow:hidden}.fn-bar i{display:block;height:100%;background:var(--brand);border-radius:99px}.fn-row b{text-align:right;color:var(--ink)}
+.todo{list-style:none;margin:0;padding:0;display:grid;gap:10px}.todo li a{display:block;color:var(--ink);line-height:1.4}.todo li small{display:block;color:var(--muted)}
+.mini-row{display:flex;gap:10px;justify-content:space-between;align-items:baseline;flex-wrap:wrap;padding:9px 0;border-bottom:1px solid var(--line)}.mini-row:last-child{border-bottom:0}
+.mini-row.stack{display:block}.mini-row .when{font-weight:700;color:var(--brand-600);font-size:13px}
+/* kanban */
+.kanban{display:flex;gap:14px;overflow-x:auto;padding-bottom:16px;align-items:flex-start}
+.kcol{flex:0 0 250px;background:#ECE6E1;border-radius:14px;padding:10px;border:2px solid transparent;transition:.15s}
+.kcol.over{border-color:var(--brand);background:var(--brand-100)}
+.kcol header{display:flex;justify-content:space-between;align-items:center;padding:4px 6px 10px}.kcol header b{color:var(--ink);font-size:13.5px}
+.kcol header i{font-style:normal;background:#fff;border-radius:99px;font-size:12px;font-weight:800;padding:1px 9px;color:var(--ink2)}
+.kdrop{display:grid;gap:9px;min-height:60px}
+.kcard{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 12px;display:grid;gap:3px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.kcard[draggable]{cursor:grab}.kcard.drag{opacity:.45}
+.kname{font-weight:800;color:var(--ink);font-size:14px}.kname:hover{color:var(--brand)}
+.kjob{font-size:12.5px;color:var(--ink2)}.kmeta{font-size:12px;color:var(--muted)}
+.kmove select{margin-top:7px;padding:5px 8px;font-size:12.5px;border-radius:8px}
+.kempty{margin:6px;font-size:13px;color:var(--muted);text-align:center}.kmore{font-size:13px;font-weight:700;text-align:center;color:var(--brand-600);padding:4px}
+.k-received header b{color:#1D5FA8}.k-more-details-needed header b{color:#B85A00}.k-shortlisted header b{color:#5B3AA8}.k-interview header b{color:#0E6C73}.k-accepted header b,.k-hired header b{color:#1E6B3A}.k-rejected header b,.k-not-qualified header b{color:#9B2C20}
+.toast{position:fixed;left:50%;bottom:24px;transform:translate(-50%,20px);background:var(--ink);color:#fff;padding:12px 20px;border-radius:12px;font-weight:600;opacity:0;pointer-events:none;transition:.25s;z-index:99;max-width:90vw}
+.toast.show{opacity:1;transform:translate(-50%,0)}.toast.bad{background:#9B2C20}
+/* form settings */
+.fld-list{display:grid;gap:0;border:1px solid var(--line);border-radius:12px;overflow:hidden}
+.fld{display:flex;gap:16px;justify-content:space-between;align-items:center;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}.fld:last-child{border-bottom:0}
+.fld b{color:var(--ink);display:block}.fld small{color:var(--muted);font-size:12.5px}.fld.fixed{background:#FAF7F4}.fld .lock{font-size:12px;font-weight:700;color:var(--muted)}
+.seg{display:inline-flex;border:1.5px solid var(--line);border-radius:10px;overflow:hidden}
+.seg label{margin:0;padding:8px 14px;font-weight:700;font-size:13px;cursor:pointer;color:var(--ink2);background:#fff;border-right:1px solid var(--line)}.seg label:last-child{border-right:0}
+.seg input{position:absolute;opacity:0;pointer-events:none;width:0}
+.seg label.on.m-required{background:var(--brand);color:#fff}.seg label.on.m-optional{background:#E3EEFB;color:#1D5FA8}.seg label.on.m-hidden{background:#EEE9E5;color:#6b6562}
+.seg label:focus-within{outline:2px solid var(--brand);outline-offset:-2px}
+/* email templates */
+.hr-master{display:flex;justify-content:space-between;gap:16px;align-items:center;flex-wrap:wrap}
+.mail-layout{display:grid;grid-template-columns:230px minmax(0,1fr) minmax(0,.9fr);gap:18px;align-items:start}
+.mail-layout>.card{margin-bottom:0}.mail-list a{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:9px;font-size:13.5px}.mail-list a:hover{background:#FAF7F4}.mail-list a.on{background:var(--brand-50);color:var(--brand-600)}
+.mail-list a b{flex:1;font-weight:700}.mail-list a small{color:var(--muted)}.dot{width:8px;height:8px;border-radius:50%;background:#cfc9c4}.dot.live{background:#2e9b57}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap}code.ph{background:var(--brand-50);color:var(--brand-600);border-radius:6px;padding:1px 6px;font-size:12px}
+.mail-prev iframe,.mail-view iframe{width:100%;height:560px;border:1px solid var(--line);border-radius:12px;background:#F6F3F0}
+.mail-view summary{cursor:pointer;color:var(--brand-600);font-weight:700;font-size:13px;margin-top:4px}.mail-view iframe{height:440px;margin-top:8px}
+@media (max-width:1250px){.mail-layout{grid-template-columns:200px minmax(0,1fr)}.mail-prev{grid-column:1/-1}}
+@media (max-width:760px){.mail-layout{grid-template-columns:1fr}.fn-row{grid-template-columns:90px 1fr 30px}}
+/* onboarding */
+.onb-row{display:flex;gap:12px;align-items:flex-start;padding:11px 0;border-bottom:1px solid var(--line)}.onb-row:last-child{border-bottom:0}
+.onb-row .chk{flex:0 0 26px;height:26px;border-radius:8px;border:2px solid #d8d0c9;background:#fff;color:#fff;font-weight:800;cursor:pointer;padding:0;display:grid;place-items:center}
+.onb-row.done .chk{background:#2e9b57;border-color:#2e9b57}.onb-row.done .ob-main b{text-decoration:line-through;color:var(--muted)}
+.ob-main{flex:1;min-width:0}.ob-main b{color:var(--ink);display:block}.ob-main small{display:block;color:var(--muted);font-size:12.5px}
+.own{display:inline-block;padding:1px 9px;border-radius:99px;font-size:11px;font-weight:800;background:#eee;color:#555}.own-employee{background:#FFE9D0;color:#B85A00}.own-hr{background:#E3EEFB;color:#1D5FA8}.own-manager{background:#EDE6FA;color:#5B3AA8}.own-it{background:#E0F3F4;color:#0E6C73}
+.onb-row .x{background:none;border:0;font-size:22px;line-height:1;color:#b9b1aa;cursor:pointer;padding:0 4px}.onb-row .x:hover{color:#9B2C20}
+.ready-row{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;padding:10px 0;border-top:1px solid var(--line)}.ready-row>div{flex:1;min-width:180px}.ready-row .inl{margin:0;display:flex;gap:8px;align-items:center}.ready-row input[type=date]{width:auto}
+table.tpl td{vertical-align:top}table.tpl input,table.tpl select{padding:7px 9px;font-size:13.5px}
+
+.side{overflow-y:auto}.mini-row.stack>a{display:block}.mini-row.stack>span{display:block}
+.bar .grow{min-width:240px}.mail-edit select{text-overflow:ellipsis}

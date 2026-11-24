@@ -615,3 +615,15 @@ a.strip-item{color:inherit}
 .sr-file{position:absolute!important;left:0;top:0;width:1px;height:1px;opacity:0;overflow:hidden;clip:rect(0 0 0 0)}.drop{position:relative}
 
 .btn-outline-dark{background:transparent;color:var(--ink);border:1.5px solid #d9d4cf}.btn-outline-dark:hover{border-color:var(--brand);color:var(--brand)}
+
+/* ===== HR: interview + onboarding in the applicant portal ===== */
+.st-shortlisted{background:#EDE6FA;color:#5B3AA8}.st-interview{background:#E0F3F4;color:#0E6C73}.st-hired{background:#1E6B3A;color:#fff}
+.hr-card h3{display:flex;align-items:center;gap:8px}.hr-card h3 .ic{width:20px;height:20px;stroke:var(--brand,#F77F00);fill:none;stroke-width:2}
+.hr-when{font-size:20px;font-weight:800;color:#1A1717;margin:4px 0 12px;display:flex;flex-wrap:wrap;gap:6px 14px;align-items:baseline}.hr-when b{color:#F77F00}
+.hr-card .prog{height:9px;border-radius:99px;background:#EFE9E4;overflow:hidden;margin:10px 0 4px}.hr-card .prog span{display:block;height:100%;background:linear-gradient(90deg,#F77F00,#FFA24D);border-radius:99px}
+.onb-cat{margin:20px 0 6px;font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:#7a7473}
+.onb-task{display:flex;gap:12px;padding:12px 0;border-bottom:1px solid #ECE7E2}.onb-task:last-child{border-bottom:0}
+.onb-task .tick{flex:0 0 26px;height:26px;border-radius:8px;border:2px solid #d8d0c9;display:grid;place-items:center;margin-top:2px}
+.onb-task.done .tick{background:#2e9b57;border-color:#2e9b57}.onb-task .tick .ic{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:3}
+.onb-task.done b{text-decoration:line-through;color:#7a7473}.ot-main b{display:block;color:#1A1717}.ot-main small{display:block;color:#7a7473;font-size:13px;line-height:1.5}
+.ot-form{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}.ot-form input[type=file]{font-size:13px;max-width:100%}

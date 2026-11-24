@@ -85,3 +85,33 @@ Generated automatically: `sitemap.xml`, `robots.txt`, `llms.txt`, per-page canon
 
 **After uploading:** (1) fill the Business tab (address matters most for Google Maps), (2) verify the site in Google Search Console and Bing Webmaster Tools, paste the codes in Tracking, submit `sitemap.xml`, (3) press "Notify search engines now", (4) work through the Visibility checklist.
 **Upgrade notes:** replace `.htaccess` (it adds the sitemap/robots rewrites, an error page and caching); keep `data/`. If `/sitemap.xml` shows "not found", use `/sitemap.php` and `/robots.php` (your host has no URL rewriting). If the site lives in a sub-folder, change `ErrorDocument 404 /404.php` in `.htaccess`. Turn on "Force HTTPS" only after the SSL certificate works.
+
+## HR & Careers (mini HR system)
+
+Everything lives under **Admin → HR & Careers**, grouped in the sidebar:
+
+| Group | Screen | What it does |
+|---|---|---|
+| Recruitment | **HR overview** | KPIs, hiring funnel, “needs attention”, upcoming interviews, onboarding progress |
+| | **Job posts** / **Applications** | Vacancies and the application list (CSV export includes the new fields) |
+| | **Pipeline board** | Kanban of every applicant. Drag a card (or use “Move to…”) to change status; the applicant is emailed |
+| Onboarding | **New hires** | Everyone hired, with progress; “Ready to onboard” lists accepted applicants |
+| | **Onboarding checklist** | The template copied to every new hire (editable; changes affect future hires) |
+| Settings | **Application form** | Set Phone, LinkedIn, CV, Cover letter, Portfolio, Location, Expected pay, Start date to Required / Optional / Hidden |
+| | **Email templates** | Edit every automatic email, preview it, send a test, switch each one (or all) off |
+| | **Email log** | Every email sent, its delivery result, a copy of what was sent, and Resend |
+
+**Statuses:** Received → Under Review → Shortlisted → Interview → Accepted → Hired (plus More Details Needed, Rejected, Not Qualified).
+All status changes go through `hr_set_status()` in `lib/hr.php`: it updates the application, writes the applicant timeline, logs staff activity,
+starts onboarding on **Hired**, and emails the applicant.
+
+**Emails** use PHP `mail()` (same as the rest of the site) and are sent as branded HTML with a plain-text fallback. If your host blocks `mail()`,
+failures appear in the Email log and on the HR overview; applicants still see every update in their portal. Placeholders: `{first_name} {name} {job} {company} {code} {status} {message} {interview_when} {interview_info} {start_date}`.
+
+**Onboarding:** hiring creates a checklist from the template (due dates are counted from the start date). Tasks owned by *Employee* appear in the new hire’s
+applicant portal where they tick them off or upload documents (offer letter, ID, photo…). HR, IT and Manager tasks are ticked by staff in *New hires → Open*.
+
+**Access:** Super Admin can change the form rules, email templates and checklist template (`careers.settings`). Level 1 can use the overview, pipeline,
+applications, new hires and email log. Billing and Intake have no access.
+
+Tests: `node hr.js` (97 checks) after a fresh database.

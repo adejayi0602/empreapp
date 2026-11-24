@@ -90,7 +90,23 @@ function admin_head(string $title, string $active = ''): void {
     elseif (can('students.create')) $nav['studentnew'] = ['student-new.php', 'Add student', 0];
     if (can('courses.view'))  $nav['courses']   = ['courses.php', 'Courses', 0];
     $nav['tasks'] = ['tasks.php', can('tasks.viewall') ? 'Tasks' : 'My tasks', $myOpen];
-    if (can('careers.view')) { $nav['jobs'] = ['jobs.php', 'Careers', 0]; $nav['applications'] = ['applications.php', 'Applications', (int)qv("SELECT COUNT(*) FROM applications WHERE status='Received'")]; }
+    if (can('careers.view')) {   // HR & Careers is grouped: Recruitment, Onboarding, Careers settings
+        $nav['_h1'] = ['', 'HR & Careers · Recruitment', -1];
+        $nav['hr'] = ['hr.php', 'HR overview', 0];
+        $nav['jobs'] = ['jobs.php', 'Job posts', 0];
+        $nav['applications'] = ['applications.php', 'Applications', (int)qv("SELECT COUNT(*) FROM applications WHERE status='Received'")];
+        $nav['pipeline'] = ['pipeline.php', 'Pipeline board', 0];
+        $nav['_h2'] = ['', 'HR & Careers · Onboarding', -1];
+        $nav['onboarding'] = ['onboarding.php', 'New hires', (int)qv("SELECT COUNT(*) FROM onboardings WHERE status='In progress'")];
+        if (can('careers.settings')) $nav['onbtpl'] = ['onboarding-template.php', 'Onboarding checklist', 0];
+        if (can('careers.settings')) {
+            $nav['_h3'] = ['', 'HR & Careers · Settings', -1];
+            $nav['cform'] = ['careers-form.php', 'Application form', 0];
+            $nav['cemails'] = ['careers-emails.php', 'Email templates', 0];
+            $nav['cmaillog'] = ['careers-maillog.php', 'Email log', 0];
+        } elseif (can('careers.manage')) { $nav['cmaillog'] = ['careers-maillog.php', 'Email log', 0]; }
+        $nav['_h4'] = ['', 'Website & system', -1];
+    }
     if (can('seo.view')) $nav['seo'] = ['seo.php', 'SEO & Visibility', 0];
     if (can('services.manage')) $nav['services'] = ['services.php', 'Services', 0];
     if (can('staff.manage'))  $nav['staff']     = ['staff.php', 'Staff & access', 0];
@@ -103,6 +119,7 @@ function admin_head(string $title, string $active = ''): void {
 <link rel="stylesheet" href="../assets/css/admin.css"></head><body>
 <div class="shell"><aside class="side" id="side"><a class="brand" href="' . e(home_page()) . '"><img src="../assets/img/logo-icon.png" alt=""><span><b>Empre</b><small>ADMIN</small></span></a><nav>';
     foreach ($nav as $k => [$href, $label, $n]) {
+        if ($n === -1) { echo '<div class="nav-h">' . e($label) . '</div>'; continue; }
         echo '<a href="' . $href . '" class="' . ($active === $k ? 'on' : '') . '">' . e($label) . ($n ? '<i>' . $n . '</i>' : '') . '</a>';
     }
     echo '</nav><div class="side-foot"><a href="../index.php" target="_blank">View website ↗</a><a href="logout.php">Sign out</a>' .

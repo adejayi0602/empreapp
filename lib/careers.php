@@ -13,7 +13,7 @@ declare(strict_types=1);
  * ===================================================================== */
 
 const JOB_STATUSES = ['Draft', 'Open', 'Closed'];
-const APP_STATUSES = ['Received', 'Under Review', 'More Details Needed', 'Accepted', 'Rejected', 'Not Qualified'];
+const APP_STATUSES = ['Received', 'Under Review', 'Shortlisted', 'Interview', 'More Details Needed', 'Accepted', 'Hired', 'Rejected', 'Not Qualified'];
 const JOB_TYPES    = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Full-time / Part-time / Contract'];
 const HIRING_STEPS = [
     ['Application review', 'We read every application carefully.'],
@@ -154,6 +154,9 @@ function app_status_info(string $s): array {
         'Received'            => ['Application received', 'Thank you for applying. Our team will review your application shortly.', 'info'],
         'Under Review'        => ['Under review', 'Your application is being reviewed by the hiring team. We will update this page as soon as there is news.', 'info'],
         'More Details Needed' => ['Action needed: more details required', 'The hiring team needs a little more information from you. Please update your application below.', 'warn'],
+        'Shortlisted'         => ['You are shortlisted', 'Good news. Your profile stood out and you are on our shortlist. We will contact you about the next step.', 'good'],
+        'Interview'           => ['Interview stage', 'We would like to speak with you. See the interview details below and watch your email.', 'good'],
+        'Hired'               => ['Welcome to the team', 'Congratulations and welcome aboard! Complete your onboarding checklist below to get ready for day one.', 'good'],
         'Accepted'            => ['Congratulations, application accepted', 'We would love to take this further. The team will contact you with the next steps.', 'good'],
         'Rejected'            => ['Not moving forward', 'Thank you for your interest. We will not be taking your application forward at this time.', 'bad'],
         'Not Qualified'       => ['Requirements not met', 'Thank you for applying. After review, your profile does not currently meet the requirements for this role.', 'bad'],
@@ -162,7 +165,7 @@ function app_status_info(string $s): array {
 }
 /** 0..2 position on the 3-step tracker: Submitted, In review, Decision */
 function app_stage(string $s): int {
-    return match ($s) { 'Received' => 0, 'Under Review', 'More Details Needed' => 1, default => 2 };
+    return match ($s) { 'Received' => 0, 'Under Review', 'Shortlisted', 'Interview', 'More Details Needed' => 1, default => 2 };
 }
 
 /* ------------------------------------------------------------------ uploads */
@@ -235,12 +238,7 @@ function csv_download(string $filename, array $header, array $rows): never {
 function mail_new_application(array $app, array $job): void {
     send_mail(careers_inbox(), 'New job application ' . $app['code'] . ' - ' . $job['title'],
         "A new application was received.\n\nReference: {$app['code']}\nRole: {$job['title']} ({$job['company']})\nName: {$app['name']}\nEmail: {$app['email']}\nPhone: {$app['phone']}\nLinkedIn: {$app['linkedin']}\n\nReview it in the admin: " . site_url('admin/application.php?id=' . $app['id']) . "\n", $app['email']);
-    send_mail($app['email'], 'We received your application: ' . $job['title'] . ' (' . $app['code'] . ')',
-        "Hello {$app['name']},\n\nThank you for applying for {$job['title']} at {$job['company']}.\n\nYour reference: {$app['code']}\n\nYou can follow your application, see its status and upload anything we ask for in your applicant portal:\n" . site_url('portal.php') . "\n\nSign in with the email address you applied with and the password you created.\n\nEmpre Technologies Careers\n");
-}
-function mail_application_update(array $app, array $job, string $headline, string $extra = ''): void {
-    send_mail($app['email'], 'Update on your application: ' . $job['title'] . ' (' . $app['code'] . ')',
-        "Hello {$app['name']},\n\nThere is an update on your application for {$job['title']} ({$app['code']}).\n\nStatus: $headline\n" . ($extra !== '' ? "\n$extra\n" : '') . "\nView it in your applicant portal:\n" . site_url('portal-app.php?id=' . $app['id']) . "\n\nEmpre Technologies Careers\n");
+    hr_notify('received', $app, $job);   // styled confirmation to the applicant (editable under Careers > Email templates)
 }
 
 /* ------------------------------------------------------------------ first set of jobs (from the Conversa AI vacancies document) */

@@ -6,26 +6,21 @@ if (!$j) redirect('careers.php');
 $me = applicant_user();
 if ($me && ($ex = q1("SELECT id FROM applications WHERE job_id=? AND applicant_id=?", [$j['id'], $me['id']]))) { flash('You have already applied for this role. Here is your application.'); redirect('portal-app.php?id=' . $ex['id']); }
 $open = job_is_open($j);
-$errors = []; $v = ['name' => $me['name'] ?? '', 'email' => $me['email'] ?? '', 'phone' => $me['phone'] ?? '', 'linkedin' => '', 'cover_letter' => '', 'answer' => '', 'password' => '', 'password2' => ''];
+$errors = []; $v = ['name' => $me['name'] ?? '', 'email' => $me['email'] ?? '', 'phone' => $me['phone'] ?? '', 'linkedin' => '', 'portfolio' => '', 'location' => '', 'expected_pay' => '', 'available_from' => '', 'cover_letter' => '', 'answer' => '', 'password' => '', 'password2' => ''];
 
 if ($open && $_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!$_POST && (int)($_SERVER['CONTENT_LENGTH'] ?? 0) > 0) { $errors['form'] = 'Your file is larger than this server allows (maximum ' . upload_limit_label() . '). Please choose a smaller file.'; }
     else {
         csrf_check();
         if (post('company_site') !== '') redirect('careers.php');
-        foreach (['name', 'phone', 'linkedin'] as $k) $v[$k] = line(post($k, 200));
+        foreach (['name', 'phone', 'linkedin', 'portfolio', 'location', 'expected_pay', 'available_from'] as $k) $v[$k] = line(post($k, 250));
         if (!$me) $v['email'] = line(post('email', 150));
         $v['cover_letter'] = post('cover_letter', 3500); $v['answer'] = post('answer', 2500);
         $v['password'] = (string)($_POST['password'] ?? ''); $v['password2'] = (string)($_POST['password2'] ?? '');
         if (throttled('apply:' . client_ip(), 6, 3600)) $errors['form'] = 'Too many applications from this connection. Please try again later.';
         if (mb_strlen($v['name']) < 3 || !str_contains($v['name'], ' ')) $errors['name'] = 'Please enter your full name (first and last name).';
         if (!filter_var($v['email'], FILTER_VALIDATE_EMAIL)) $errors['email'] = 'Enter a valid email address.';
-        if (!preg_match('/^\+?[0-9][0-9 \-()]{6,18}$/', $v['phone'])) $errors['phone'] = 'Enter a valid phone number.';
-        $li = $v['linkedin']; if ($li !== '' && !preg_match('~^https?://~i', $li)) $li = 'https://' . $li;
-        $host = strtolower((string)parse_url($li, PHP_URL_HOST));
-        if ($li === '' || !filter_var($li, FILTER_VALIDATE_URL) || !preg_match('/(^|\.)linkedin\.com$/', $host)) $errors['linkedin'] = 'Enter the link to your LinkedIn profile (linkedin.com/in/your-name).';
-        else $v['linkedin'] = mb_substr($li, 0, 250);
-        if (mb_strlen(trim($v['cover_letter'])) < 100) $errors['cover_letter'] = 'Please tell us why you are the best fit (at least 100 characters).';
+        $errors += hr_validate_fields($v);   // phone, LinkedIn, cover letter and extras follow the Careers > Application form settings
         if ($j['extra_question'] && $j['extra_required'] && mb_strlen(trim($v['answer'])) < 10) $errors['answer'] = 'Please answer this question (at least a short sentence).';
         if (!$me) {
             if (!isset($errors['email']) && q1("SELECT id FROM applicants WHERE email=?", [$v['email']]))
@@ -34,10 +29,10 @@ if ($open && $_SERVER['REQUEST_METHOD'] === 'POST') {
             elseif ($v['password'] !== $v['password2']) $errors['password2'] = 'The passwords do not match.';
         }
         if (empty($_POST['consent'])) $errors['consent'] = 'Please confirm to continue.';
-        [$cvStored, $cvName, $cvErr] = store_upload($_FILES['cv'] ?? null, $errors ? [] : CV_TYPES);   // only stored when everything else is valid
+        [$cvStored, $cvName, $cvErr] = field_shown('cv') ? store_upload($_FILES['cv'] ?? null, $errors ? [] : CV_TYPES) : [null, null, 'nofile'];   // only stored when everything else is valid
         if ($errors) { if ($cvStored) { delete_upload($cvStored); } $cvStored = null; }
-        elseif ($cvErr === 'nofile') $errors['cv'] = 'Please upload your CV (PDF or Word).';
-        elseif ($cvErr) $errors['cv'] = $cvErr;
+        elseif ($cvErr === 'nofile' && field_req('cv')) $errors['cv'] = 'Please upload your CV (PDF or Word).';
+        elseif ($cvErr && $cvErr !== 'nofile') $errors['cv'] = $cvErr;   // 'nofile' with an optional CV is fine
         elseif (!$errors) {
             try {
                 $pdo = db(); $pdo->beginTransaction();
@@ -45,8 +40,8 @@ if ($open && $_SERVER['REQUEST_METHOD'] === 'POST') {
                 if (!$aid) $aid = run("INSERT INTO applicants(name,email,phone,password_hash,created_at) VALUES(?,?,?,?,?)", [$v['name'], $v['email'], $v['phone'], password_hash($v['password'], PASSWORD_DEFAULT), now()]);
                 $id = 0;
                 $code = insert_with_code('APP', 'applications', 'code', function ($c) use (&$id, $j, $aid, $v, $cvStored, $cvName) {
-                    $id = run("INSERT INTO applications(code,job_id,applicant_id,name,email,phone,linkedin,cv_file,cv_name,cover_letter,answer,status,created_at,updated_at) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
-                        [$c, $j['id'], $aid, $v['name'], $v['email'], $v['phone'], $v['linkedin'], $cvStored, $cvName, trim($v['cover_letter']), trim($v['answer']), 'Received', now(), now()]);
+                    $id = run("INSERT INTO applications(code,job_id,applicant_id,name,email,phone,linkedin,cv_file,cv_name,cover_letter,answer,status,created_at,updated_at,portfolio,location,expected_pay,available_from) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                        [$c, $j['id'], $aid, $v['name'], $v['email'], $v['phone'], $v['linkedin'], $cvStored, $cvName, trim($v['cover_letter']), trim($v['answer']), 'Received', now(), now(), $v['portfolio'], $v['location'], $v['expected_pay'], $v['available_from']]);
                 });
                 app_event($id, 'submitted', 'Application submitted for ' . $j['title'] . '.', $v['name']);
                 $pdo->commit();
@@ -87,16 +82,22 @@ $lim = upload_limit_label();
       <div class="field<?= isset($errors['name']) ? ' bad' : '' ?>"><label for="name">Full name *</label><input id="name" name="name" value="<?= e($v['name']) ?>" autocomplete="name" required><?= $err('name') ?></div>
       <div class="form-row">
         <div class="field<?= isset($errors['email']) ? ' bad' : '' ?>"><label for="email">Email address *</label><input id="email" name="email" type="email" value="<?= e($v['email']) ?>" autocomplete="email" <?= $me ? 'readonly' : '' ?> required><?= $err('email') ?></div>
-        <div class="field<?= isset($errors['phone']) ? ' bad' : '' ?>"><label for="phone">Phone number *</label><input id="phone" name="phone" type="tel" value="<?= e($v['phone']) ?>" autocomplete="tel" placeholder="+234…" required><?= $err('phone') ?></div>
+        <?php if (field_shown('phone')): ?><div class="field<?= isset($errors['phone']) ? ' bad' : '' ?>"><label for="phone"><?= e(field_label('phone')) ?></label><input id="phone" name="phone" type="tel" value="<?= e($v['phone']) ?>" autocomplete="tel" placeholder="+234…" <?= field_req('phone') ? 'required' : '' ?>><?= $err('phone') ?></div><?php endif; ?>
       </div>
-      <div class="field<?= isset($errors['linkedin']) ? ' bad' : '' ?>"><label for="linkedin">LinkedIn profile *</label><input id="linkedin" name="linkedin" value="<?= e($v['linkedin']) ?>" placeholder="https://www.linkedin.com/in/your-name" inputmode="url" required><?= $err('linkedin') ?></div>
+      <?php if (field_shown('linkedin')): ?><div class="field<?= isset($errors['linkedin']) ? ' bad' : '' ?>"><label for="linkedin"><?= e(field_label('linkedin')) ?></label><input id="linkedin" name="linkedin" value="<?= e($v['linkedin']) ?>" placeholder="https://www.linkedin.com/in/your-name" inputmode="url" <?= field_req('linkedin') ? 'required' : '' ?>><?= $err('linkedin') ?></div><?php endif; ?>
+      <?php if (field_shown('portfolio')): ?><div class="field<?= isset($errors['portfolio']) ? ' bad' : '' ?>"><label for="portfolio"><?= e(field_label('portfolio')) ?></label><input id="portfolio" name="portfolio" value="<?= e($v['portfolio']) ?>" placeholder="https://yourname.com" inputmode="url" <?= field_req('portfolio') ? 'required' : '' ?>><?= $err('portfolio') ?></div><?php endif; ?>
+      <?php if (field_shown('location') || field_shown('expected_pay') || field_shown('available_from')): ?><div class="form-row">
+        <?php if (field_shown('location')): ?><div class="field<?= isset($errors['location']) ? ' bad' : '' ?>"><label for="location"><?= e(field_label('location')) ?></label><input id="location" name="location" value="<?= e($v['location']) ?>" placeholder="e.g. Lagos, Nigeria" <?= field_req('location') ? 'required' : '' ?>><?= $err('location') ?></div><?php endif; ?>
+        <?php if (field_shown('expected_pay')): ?><div class="field<?= isset($errors['expected_pay']) ? ' bad' : '' ?>"><label for="expected_pay"><?= e(field_label('expected_pay')) ?></label><input id="expected_pay" name="expected_pay" value="<?= e($v['expected_pay']) ?>" placeholder="e.g. ₦250,000 per month" <?= field_req('expected_pay') ? 'required' : '' ?>><?= $err('expected_pay') ?></div><?php endif; ?>
+        <?php if (field_shown('available_from')): ?><div class="field<?= isset($errors['available_from']) ? ' bad' : '' ?>"><label for="available_from"><?= e(field_label('available_from')) ?></label><input id="available_from" name="available_from" type="date" value="<?= e($v['available_from']) ?>" <?= field_req('available_from') ? 'required' : '' ?>><?= $err('available_from') ?></div><?php endif; ?>
+      </div><?php endif; ?>
       <h4 class="form-sec">Your application</h4>
-      <div class="field<?= isset($errors['cv']) ? ' bad' : '' ?>"><label for="cv">Upload your CV *</label>
+      <?php if (field_shown('cv')): ?><div class="field<?= isset($errors['cv']) ? ' bad' : '' ?>"><label for="cv"><?= e(field_label('cv', 'Upload your CV')) ?></label>
         <label class="dropfile" for="cv"><?= svg_icon('upload') ?><span><b id="cv-name">Choose a file</b><small>PDF, DOC or DOCX · up to <?= e($lim) ?></small></span></label>
-        <input id="cv" name="cv" type="file" accept=".pdf,.doc,.docx" class="sr-file" required><?= $err('cv') ?></div>
-      <div class="field<?= isset($errors['cover_letter']) ? ' bad' : '' ?>"><label for="cover_letter">Cover letter: why are you the best fit for this role? *</label>
-        <textarea id="cover_letter" name="cover_letter" rows="7" maxlength="3500" placeholder="Tell us about your experience, what you would bring to the role and why you want to join us." required><?= e($v['cover_letter']) ?></textarea>
-        <span class="count" data-for="cover_letter">0 / 3500</span><?= $err('cover_letter') ?></div>
+        <input id="cv" name="cv" type="file" accept=".pdf,.doc,.docx" class="sr-file" <?= field_req('cv') ? 'required' : '' ?>><?= $err('cv') ?></div><?php endif; ?>
+      <?php if (field_shown('cover_letter')): ?><div class="field<?= isset($errors['cover_letter']) ? ' bad' : '' ?>"><label for="cover_letter"><?= e(field_label('cover_letter', 'Cover letter: why are you the best fit for this role?')) ?></label>
+        <textarea id="cover_letter" name="cover_letter" rows="7" maxlength="3500" placeholder="Tell us about your experience, what you would bring to the role and why you want to join us." <?= field_req('cover_letter') ? 'required' : '' ?>><?= e($v['cover_letter']) ?></textarea>
+        <span class="count" data-for="cover_letter">0 / 3500</span><?= $err('cover_letter') ?></div><?php endif; ?>
       <?php if (trim((string)$j['extra_question'])): ?>
       <div class="field<?= isset($errors['answer']) ? ' bad' : '' ?>"><label for="answer"><?= e($j['extra_question']) ?><?= $j['extra_required'] ? ' *' : ' (optional)' ?></label>
         <textarea id="answer" name="answer" rows="4" maxlength="2500" <?= $j['extra_required'] ? 'required' : '' ?>><?= e($v['answer']) ?></textarea><?= $err('answer') ?></div>

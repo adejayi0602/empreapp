@@ -119,6 +119,7 @@ function migrate(PDO $pdo): void {
         $pdo->exec("INSERT OR IGNORE INTO settings(k,v) VALUES('conversa_service_added','1')");
     }
     careers_schema($pdo);
+    hr_schema($pdo);
     seo_schema($pdo);
 }
 
@@ -264,5 +265,6 @@ function admin_label(?int $id): string {
 
 require_once __DIR__ . '/services.php';
 require_once __DIR__ . '/careers.php';
+require_once __DIR__ . '/hr.php';
 require_once __DIR__ . '/seo.php';
 seo_boot();

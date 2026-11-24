@@ -9,8 +9,8 @@ $sql = "SELECT a.*, j.title jtitle, j.company jcompany FROM applications a JOIN 
 if (isset($_GET['export'])) {
     $all = q($sql, $p);
     log_act('export', 0, 'Exported ' . count($all) . ' application(s) to CSV');
-    csv_download('applications-' . date('Y-m-d') . '.csv', ['Reference', 'Job', 'Company', 'Applicant name', 'Email', 'Phone', 'LinkedIn', 'Status', 'Applied', 'Last updated', 'CV file', 'Role question answer', 'Cover letter', 'Info requested', 'Decision note', 'Internal note', 'Reviewed by'],
-        array_map(fn($a) => [$a['code'], $a['jtitle'], $a['jcompany'], $a['name'], $a['email'], $a['phone'], $a['linkedin'], $a['status'], $a['created_at'], $a['updated_at'], $a['cv_name'], $a['answer'], $a['cover_letter'], $a['info_request'], $a['decision_note'], $a['admin_note'], $a['reviewed_by']], $all));
+    csv_download('applications-' . date('Y-m-d') . '.csv', ['Reference', 'Job', 'Company', 'Applicant name', 'Email', 'Phone', 'LinkedIn', 'Status', 'Applied', 'Last updated', 'CV file', 'Role question answer', 'Cover letter', 'Info requested', 'Decision note', 'Internal note', 'Reviewed by', 'Portfolio', 'Location', 'Expected pay', 'Available from', 'Interview'],
+        array_map(fn($a) => [$a['code'], $a['jtitle'], $a['jcompany'], $a['name'], $a['email'], $a['phone'], $a['linkedin'], $a['status'], $a['created_at'], $a['updated_at'], $a['cv_name'], $a['answer'], $a['cover_letter'], $a['info_request'], $a['decision_note'], $a['admin_note'], $a['reviewed_by'], $a['portfolio'], $a['location'], $a['expected_pay'], $a['available_from'], $a['interview_at']], $all));
 }
 $rows = q($sql . " LIMIT 300", $p);
 $cj = $fj ? ' AND job_id=' . $fj : '';
